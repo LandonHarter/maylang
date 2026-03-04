@@ -1,51 +1,24 @@
 enum TokenType {
-    LEFT_PAREN,
-    RIGHT_PAREN,
+    LEFT_BRACKET,
+    RIGHT_BRACKET,
     LEFT_BRACE,
     RIGHT_BRACE,
-    COMMA,
-    DOT,
-    MINUS,
-    PLUS,
-    SEMICOLON,
-    SLASH,
-    STAR,
-    
-    BANG,
-    BANG_EQUAL,
-    EQUAL,
-    EQUAL_EQUAL,
-    GREATER,
-    GREATER_EQUAL,
-    LESS,
-    LESS_EQUAL,
-    
-    IDENTIFIER,
-    STRING,
-    NUMBER,
-    
-    AND,
-    CLASS,
-    ELSE,
-    FALSE,
-    FUN,
-    FOR,
-    IF,
-    NIL,
-    OR,
-    PRINT,
-    RETURN,
-    SUPER,
-    THIS,
-    TRUE,
-    VAR,
-    WHILE,
 
-    END_FILE 
+    SEMICOLON,
+
+    EQUALS,
+    EQUALS_EQUALS,
+    EQUALS_EQUALS_EQUALS,
+    EQUALS_EQUALS_EQUALS_EQUALS,
+
+    EXCLAMATION,
+    QUESTION,
+
+    END_FILE
 };
 
 struct Token {
-    const enum TokenType type;
-    const unsigned int line;
-    char literal[];
+    enum TokenType type;
+    unsigned int line;
+    char lexeme[256];
 };

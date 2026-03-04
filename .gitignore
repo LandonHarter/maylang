@@ -1,4 +1,5 @@
 compile.sh
 .claude/
-interpreter
+.cache/
+gom
 test.gom

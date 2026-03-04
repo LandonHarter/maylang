@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "token.h"
+#include "lexer.h"
 
 int main(int argc, char* argv[]) {
     FILE* fptr;
@@ -29,11 +29,17 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     fbuf[fsize] = '\0';
-
-    printf("%s", fbuf);
-
     fclose(fptr);
+
+    struct TokenList tokens = tokenize(fbuf);
     free(fbuf);
+
+    for (size_t i = 0; i < tokens.count; i++) {
+        printf("Token { type: %d, lexeme: \"%s\", line: %u }\n",
+               tokens.tokens[i].type, tokens.tokens[i].lexeme, tokens.tokens[i].line);
+    }
+
+    free_token_list(&tokens);
 
     return 0;
 }

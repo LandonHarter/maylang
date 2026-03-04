@@ -1,0 +1,41 @@
+[
+  {
+    "file": "src/lexer.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/lexer.c",
+      "-o",
+      "gom"
+    ],
+    "directory": "/home/landonh/projects/gom-interpreter",
+    "output": "gom"
+  },
+  {
+    "file": "src/token.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/token.c",
+      "-o",
+      "gom"
+    ],
+    "directory": "/home/landonh/projects/gom-interpreter",
+    "output": "gom"
+  },
+  {
+    "file": "main.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "main.c",
+      "-o",
+      "gom"
+    ],
+    "directory": "/home/landonh/projects/gom-interpreter",
+    "output": "gom"
+  }
+]
