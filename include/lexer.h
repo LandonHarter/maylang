@@ -1,5 +1,13 @@
 #include "token.h"
+#include "types.h"
 #include <stddef.h>
+
+struct LexerSource {
+    char* src;
+
+    unsigned int idx;
+    unsigned int line;
+};
 
 struct TokenList {
     struct Token* tokens;
@@ -9,3 +17,5 @@ struct TokenList {
 
 struct TokenList tokenize(char* src);
 void free_token_list(struct TokenList* list);
+
+void string_val(struct LexerSource* src, struct GOMString* str);

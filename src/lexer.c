@@ -20,25 +20,25 @@ static void append_basic_token(struct TokenList* list, struct Token* tok, enum T
     append_token(list, *tok);
 }
 
-static bool follows(char* src, int* idx, const char* match) {
+static bool follows(struct LexerSource* src, const char* match) {
     for (size_t i = 0; i < strlen(match); i++) {
-        if (src[*idx + i + 1] != match[i]) {
+        if (src->src[src->idx + i + 1] != match[i]) {
             return false;
         }
     }
 
-    *idx += strlen(match);
+    src->idx += strlen(match);
     return true;
 }
 
 struct TokenList tokenize(char* src) {
     struct TokenList list = {NULL, 0, 0};
-    unsigned int line = 1;
+    struct LexerSource source = {src, 0, 1};
 
-    for (int i = 0; src[i] != '\0'; i++) {
-        char c = src[i];
+    while (source.src[source.idx] != '\0') {
+        char c = src[source.idx];
         struct Token tok;
-        tok.line = line;
+        tok.line = source.line;
 
         switch (c) {
             case '[':
@@ -64,13 +64,13 @@ struct TokenList tokenize(char* src) {
                 break;
             case '=':
                 int num_equal = 1;
-                if (follows(src, &i, "===")) {
+                if (follows(&source, "===")) {
                     tok.type = EQUALS_EQUALS_EQUALS_EQUALS;
                     num_equal = 4;
-                } else if (follows(src, &i, "==")) {
+                } else if (follows(&source, "==")) {
                     tok.type = EQUALS_EQUALS_EQUALS;
                     num_equal = 3;
-                } else if (follows(src, &i, "=")) {
+                } else if (follows(&source, "=")) {
                     tok.type = EQUALS_EQUALS;
                     num_equal = 2;
                 }
@@ -81,8 +81,23 @@ struct TokenList tokenize(char* src) {
                 tok.lexeme[num_equal] = '\0';
                 append_token(&list, tok);
                 break;
+            case '"':
+                struct GOMString str = {NULL, 0};
+                string_val(&source, &str);
+
+                tok.type = STRING;
+                tok.lexeme[0] = '"';
+                for (int j = 0; j < str.len; j++) {
+                    tok.lexeme[j + 1] = str.val[j];
+                }
+                tok.lexeme[str.len + 1] = '"';
+                tok.lexeme[str.len + 2] = '\0';
+                tok.literal = &str;
+
+                append_token(&list, tok);
+                break;
             case '\n':
-                line++;
+                source.line += 1;
                 break;
             case ' ': break;
             case '\t': break;
@@ -95,11 +110,13 @@ struct TokenList tokenize(char* src) {
                 exit(-1);
                 break;
         }
+
+        source.idx += 1;
     }
 
     struct Token eof_tok;
     eof_tok.type = END_FILE;
-    eof_tok.line = line;
+    eof_tok.line = source.line;
     eof_tok.lexeme[0] = '\0';
     append_token(&list, eof_tok);
 
@@ -111,4 +128,12 @@ void free_token_list(struct TokenList* list) {
     list->tokens = NULL;
     list->count = 0;
     list->capacity = 0;
+}
+
+void string_val(struct LexerSource* src, struct GOMString* str) {
+    src->idx++;
+    while (src->src[src->idx++] != '"') {
+        str->len++;
+    }
+    str->val = src->src + src->idx - str->len - 1;
 }

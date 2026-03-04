@@ -35,8 +35,8 @@ int main(int argc, char* argv[]) {
     free(fbuf);
 
     for (size_t i = 0; i < tokens.count; i++) {
-        printf("Token { type: %d, lexeme: \"%s\", line: %u }\n",
-               tokens.tokens[i].type, tokens.tokens[i].lexeme, tokens.tokens[i].line);
+        printf("Token { type: %d, lexeme: \"%s\", literal: \"%p\", line: %u }\n",
+               tokens.tokens[i].type, tokens.tokens[i].lexeme, tokens.tokens[i].literal, tokens.tokens[i].line);
     }
 
     free_token_list(&tokens);

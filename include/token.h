@@ -4,6 +4,8 @@ enum TokenType {
     LEFT_BRACE,
     RIGHT_BRACE,
 
+    STRING,
+
     SEMICOLON,
 
     EQUALS,
@@ -21,4 +23,5 @@ struct Token {
     enum TokenType type;
     unsigned int line;
     char lexeme[256];
+    void* literal;
 };
