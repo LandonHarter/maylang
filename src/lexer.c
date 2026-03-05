@@ -54,7 +54,13 @@ struct TokenList tokenize(char* src) {
                 append_basic_token(&list, &tok, RIGHT_BRACE, &c);
                 break;
             case '!':
-                append_basic_token(&list, &tok, EXCLAMATION, &c);
+                if (follows(&source, "=")) {
+                    tok.type = NOT_EQUALS;
+                    tok.lexeme[0] = '!';
+                    tok.lexeme[1] = '=';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                }
                 break;
             case '?':
                 append_basic_token(&list, &tok, QUESTION, &c);
@@ -151,7 +157,7 @@ void string_val(struct LexerSource* src, struct GOMString* str) {
 
 void number_val(struct LexerSource* src, float* num, struct Token* tok) {
     int len = 0;
-    while (is_digit(src->src[src->idx++])) {
+    while (is_digit_or_dec(src->src[src->idx++])) {
         len++;
     }
 
