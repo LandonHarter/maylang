@@ -105,9 +105,20 @@ struct TokenList tokenize(char* src) {
             case '(': break;
             case ')': break;
             default:
-                perror("Unknown character");
-                free_token_list(&list);
-                exit(-1);
+                if (is_digit(c)) {
+                    float num;
+                    number_val(&source, &num, &tok);
+
+                    tok.type = NUMBER;
+                    snprintf(tok.lexeme, 256, "%f", num);
+                    tok.literal = &num;
+
+                    append_token(&list, tok);
+                } else {
+                    perror("Unknown character");
+                    free_token_list(&list);
+                    exit(-1);
+                }
                 break;
         }
 
@@ -136,4 +147,20 @@ void string_val(struct LexerSource* src, struct GOMString* str) {
         str->len++;
     }
     str->val = src->src + src->idx - str->len - 1;
+}
+
+void number_val(struct LexerSource* src, float* num, struct Token* tok) {
+    int len = 0;
+    while (is_digit(src->src[src->idx++])) {
+        len++;
+    }
+
+    char digits[len + 1];
+    strncpy(digits, src->src + src->idx - len - 1, len);
+    digits[len] = '\0';
+    *num = (double) atof(digits);
+
+    for (int i = 0; i < len + 1; i++) {
+        tok->lexeme[i] = digits[i];
+    }
 }

@@ -7,10 +7,10 @@
       "./include",
       "src/lexer.c",
       "-o",
-      "gom"
+      "may"
     ],
-    "directory": "/home/landonh/projects/gom-interpreter",
-    "output": "gom"
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
   },
   {
     "file": "src/token.c",
@@ -20,10 +20,23 @@
       "./include",
       "src/token.c",
       "-o",
-      "gom"
+      "may"
     ],
-    "directory": "/home/landonh/projects/gom-interpreter",
-    "output": "gom"
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
+  },
+  {
+    "file": "src/types.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/types.c",
+      "-o",
+      "may"
+    ],
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
   },
   {
     "file": "main.c",
@@ -33,9 +46,9 @@
       "./include",
       "main.c",
       "-o",
-      "gom"
+      "may"
     ],
-    "directory": "/home/landonh/projects/gom-interpreter",
-    "output": "gom"
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
   }
 ]

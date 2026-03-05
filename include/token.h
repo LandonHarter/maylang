@@ -5,6 +5,7 @@ enum TokenType {
     RIGHT_BRACE,
 
     STRING,
+    NUMBER,
 
     SEMICOLON,
 

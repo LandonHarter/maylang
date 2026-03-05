@@ -1,5 +1,6 @@
 compile.sh
 .claude/
 .cache/
-gom
-test.gom
+
+may
+examples/dev
