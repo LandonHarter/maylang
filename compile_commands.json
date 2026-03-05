@@ -26,6 +26,32 @@
     "output": "may"
   },
   {
+    "file": "src/parser.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/parser.c",
+      "-o",
+      "may"
+    ],
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
+  },
+  {
+    "file": "src/rules.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/rules.c",
+      "-o",
+      "may"
+    ],
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
+  },
+  {
     "file": "src/types.c",
     "arguments": [
       "gcc",

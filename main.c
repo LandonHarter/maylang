@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "may.h"
 #include "lexer.h"
+#include "parser.h"
 
 int main(int argc, char* argv[]) {
     #if defined(_WIN32) || defined(_WIN64)
@@ -39,11 +39,9 @@ int main(int argc, char* argv[]) {
     struct TokenList tokens = tokenize(fbuf);
     free(fbuf);
 
-    for (size_t i = 0; i < tokens.count; i++) {
-        printf("Token { type: %d, lexeme: \"%s\", literal: \"%p\", line: %u }\n",
-               tokens.tokens[i].type, tokens.tokens[i].lexeme, tokens.tokens[i].literal, tokens.tokens[i].line);
-    }
+    struct Expr* ast = parse(&tokens);
 
+    expr_free(ast);
     free_token_list(&tokens);
 
     return 0;

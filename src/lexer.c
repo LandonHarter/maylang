@@ -52,6 +52,18 @@ struct TokenList tokenize(char* src) {
             case '}':
                 append_basic_token(&list, &tok, RIGHT_BRACE, &c);
                 break;
+            case '+':
+                append_basic_token(&list, &tok, PLUS, &c);
+                break;
+            case '-':
+                append_basic_token(&list, &tok, MINUS, &c);
+                break;
+            case '*':
+                append_basic_token(&list, &tok, MULTIPLY, &c);
+                break;
+            case '/':
+                append_basic_token(&list, &tok, DIVIDE, &c);
+                break;
             case '!':
                 if (follows(&source, "=")) {
                     tok.type = NOT_EQUALS;
@@ -122,13 +134,21 @@ struct TokenList tokenize(char* src) {
                 append_token(&list, tok);
                 break;
             case '\n':
+                if (!semicolon_ending(&source)) {
+                    fprintf(stderr, "Line %i must end with a semicolon", source.line);
+                    exit(-1);
+                }
                 source.line += 1;
                 break;
             case ' ': break;
             case '\t': break;
             case '\r': break;
-            case '(': break;
-            case ')': break;
+            case '(':
+                append_basic_token(&list, &tok, LEFT_PAREN, &c);
+                break;
+            case ')':
+                append_basic_token(&list, &tok, RIGHT_PAREN, &c);
+                break;
             default:
                 if (is_digit(c)) {
                     float num;
