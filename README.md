@@ -18,3 +18,8 @@ Additionally, this makes it difficult for AI to generate May code, as half of th
 
 Strings must be defined with double quotes, single quotes are not allowed. This is so that code can stay consistent across all code bases and
 because double quotes are objectively better.
+
+# Compatability
+
+May should be able to run on every OS except Windows (given that the interpreter is installed). Windows could be supported, but I think
+it's best if we try to discourage the use of spyware.

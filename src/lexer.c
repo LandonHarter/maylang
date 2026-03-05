@@ -1,7 +1,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include "lexer.h"
 
@@ -20,15 +19,15 @@ static void append_basic_token(struct TokenList* list, struct Token* tok, enum T
     append_token(list, *tok);
 }
 
-static bool follows(struct LexerSource* src, const char* match) {
+int follows(struct LexerSource* src, const char* match) {
     for (size_t i = 0; i < strlen(match); i++) {
         if (src->src[src->idx + i + 1] != match[i]) {
-            return false;
+            return 0;
         }
     }
 
     src->idx += strlen(match);
-    return true;
+    return 1;
 }
 
 struct TokenList tokenize(char* src) {
@@ -68,6 +67,24 @@ struct TokenList tokenize(char* src) {
             case ';':
                 append_basic_token(&list, &tok, SEMICOLON, &c);
                 break;
+            case '&':
+                if (follows(&source, "&")) {
+                    tok.type = AND;
+                    tok.lexeme[0] = '&';
+                    tok.lexeme[1] = '&';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                }
+                break;
+            case '|':
+                if (follows(&source, "|")) {
+                    tok.type = OR;
+                    tok.lexeme[0] = '|';
+                    tok.lexeme[1] = '|';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                }
+                break;
             case '=':
                 int num_equal = 1;
                 if (follows(&source, "===")) {
@@ -79,6 +96,8 @@ struct TokenList tokenize(char* src) {
                 } else if (follows(&source, "=")) {
                     tok.type = EQUALS_EQUALS;
                     num_equal = 2;
+                } else {
+                    tok.type = EQUALS;
                 }
 
                 for (int j = 0; j < num_equal; j++) {
@@ -120,6 +139,9 @@ struct TokenList tokenize(char* src) {
                     tok.literal = &num;
 
                     append_token(&list, tok);
+                } else if (is_alpha(c)) {
+                    identifier_val(&source, &tok);
+                    append_token(&list, tok);
                 } else {
                     perror("Unknown character");
                     free_token_list(&list);
@@ -152,7 +174,8 @@ void string_val(struct LexerSource* src, struct GOMString* str) {
     while (src->src[src->idx++] != '"') {
         str->len++;
     }
-    str->val = src->src + src->idx - str->len - 1;
+    src->idx -= 2;
+    str->val = src->src + src->idx - str->len + 1;
 }
 
 void number_val(struct LexerSource* src, float* num, struct Token* tok) {
@@ -161,12 +184,31 @@ void number_val(struct LexerSource* src, float* num, struct Token* tok) {
         len++;
     }
 
+    src->idx -= 2;
+
     char digits[len + 1];
-    strncpy(digits, src->src + src->idx - len - 1, len);
+    strncpy(digits, src->src + src->idx - len + 1, len);
     digits[len] = '\0';
     *num = (double) atof(digits);
 
     for (int i = 0; i < len + 1; i++) {
         tok->lexeme[i] = digits[i];
     }
+}
+
+void identifier_val(struct LexerSource* src, struct Token* tok) {
+    unsigned int len = 0;
+    while (is_alphanumeric(src->src[src->idx++])) {
+        len++;
+    }
+
+    src->idx -= 2;
+
+    tok->type = IDENTIFIER;
+    for (int i = 0; i < len; i++) {
+        tok->lexeme[i] = src->src[src->idx - len + 1 + i];
+    }
+    tok->lexeme[len] = '\0';
+
+    get_keyword(src, tok, len);
 }

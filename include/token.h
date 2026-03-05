@@ -4,8 +4,12 @@ enum TokenType {
     LEFT_BRACE,
     RIGHT_BRACE,
 
+    IDENTIFIER,
     STRING,
     NUMBER,
+
+    AND,
+    OR,
 
     SEMICOLON,
 

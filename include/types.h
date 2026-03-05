@@ -5,3 +5,5 @@ struct GOMString {
 
 int is_digit(char c);
 int is_digit_or_dec(char c);
+int is_alpha(char c);
+int is_alphanumeric(char c);

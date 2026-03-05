@@ -1,11 +1,11 @@
 [
   {
-    "file": "src/lexer.c",
+    "file": "src/keyword.c",
     "arguments": [
       "gcc",
       "-I",
       "./include",
-      "src/lexer.c",
+      "src/keyword.c",
       "-o",
       "may"
     ],
@@ -13,12 +13,12 @@
     "output": "may"
   },
   {
-    "file": "src/token.c",
+    "file": "src/lexer.c",
     "arguments": [
       "gcc",
       "-I",
       "./include",
-      "src/token.c",
+      "src/lexer.c",
       "-o",
       "may"
     ],

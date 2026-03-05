@@ -3,6 +3,11 @@
 #include "lexer.h"
 
 int main(int argc, char* argv[]) {
+    #if defined(_WIN32) || defined(_WIN64)
+        fprintf(stderr, "WINDOWS USER DETECTED, MAY WILL NOT RUN");
+        exit(-69);
+    #endif
+
     FILE* fptr;
     fptr = fopen(argv[1], "r");
     if (fptr == NULL) {
