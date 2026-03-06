@@ -1,5 +1,6 @@
 #include "may.h"
 #include "expression.h"
+#include "statement.h"
 
 struct TokenList;
 
@@ -9,4 +10,4 @@ struct Parser {
     size_t current;
 };
 
-struct Expr* parse(struct TokenList* list);
+struct StmtList parse(struct TokenList* list);

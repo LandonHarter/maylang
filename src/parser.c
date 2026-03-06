@@ -1,5 +1,7 @@
 #include "parser.h"
 #include "lexer.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 struct Expr* expr_number(float value) {
@@ -49,6 +51,16 @@ void expr_free(struct Expr* expr) {
             break;
     }
     free(expr);
+}
+
+void stmt_free(struct Stmt* stmt) {
+    if (!stmt) return;
+    switch (stmt->type) {
+        case STMT_EXPR:
+            expr_free(stmt->as.expr);
+            break;
+    }
+    free(stmt);
 }
 
 static struct Token* peek(struct Parser* p) {
@@ -135,8 +147,26 @@ static struct Expr* parse_expression(struct Parser* p) {
     return parse_additive(p);
 }
 
-struct Expr* parse(struct TokenList* list) {
+static struct Stmt* parse_statement(struct Parser* p) {
+    struct Stmt* stmt = malloc(sizeof(struct Stmt));
+    stmt->type = STMT_EXPR;
+    stmt->as.expr = parse_expression(p);
+
+    if (!check(p, SEMICOLON)) {
+        fprintf(stderr, "Expected semicolon on line %i", peek(p)->line);
+        exit(-1);
+    }
+    advance(p);
+
+    return stmt;
+}
+
+struct StmtList parse(struct TokenList* list) {
     struct Parser p = {list->tokens, list->count, 0};
-    struct Expr* expr = parse_expression(&p);
-    return expr;
+    struct StmtList stmts = {NULL, 0, 0};
+    while (!check(&p, END_FILE)) {
+        append_stmt(&stmts, parse_statement(&p));
+    }
+    
+    return stmts;
 }

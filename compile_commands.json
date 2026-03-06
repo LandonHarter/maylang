@@ -78,6 +78,19 @@
     "output": "may"
   },
   {
+    "file": "src/statement.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/statement.c",
+      "-o",
+      "may"
+    ],
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
+  },
+  {
     "file": "src/types.c",
     "arguments": [
       "gcc",

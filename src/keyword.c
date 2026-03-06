@@ -13,6 +13,6 @@ int matches_keyword(struct LexerSource* src, char* keyword, unsigned int len) {
 
 void get_keyword(struct LexerSource* src, struct Token* tok, unsigned int len) {
     if (matches_keyword(src, "void", len)) {
-        tok->type = AND;
+        tok->type = VOID;
     }
 }

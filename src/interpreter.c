@@ -2,10 +2,12 @@
 #include "expression.h"
 #include "types.h"
 #include "error.h"
+#include "statement.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct MayValue* evaluate(struct Expr* expr) {
+struct MayValue* evaluate_expr(struct Expr* expr) {
     if (expr->type == EXPR_NUMBER) {
         struct MayValue* result = malloc(sizeof(struct MayValue));
         result->type = MAY_FLOAT;
@@ -25,8 +27,21 @@ struct MayValue* evaluate(struct Expr* expr) {
     return NULL;
 }
 
+struct MayValue* evaluate_stmt(struct Stmt* stmt) {
+    if (stmt->type == STMT_EXPR) {
+        return evaluate_expr(stmt->as.expr);
+    }
+    return NULL;
+}
+
+void evaluate(struct StmtList* list) {
+    for (int i = 0; i < list->count; i++) {
+        struct MayValue* ret = evaluate_stmt(list->stmts[i]);
+    }
+}
+
 struct MayValue* evaluate_urnary(struct Expr* expr) {
-    struct MayValue* right = evaluate(expr->as.unary.operand);
+    struct MayValue* right = evaluate_expr(expr->as.unary.operand);
     if (right->type != MAY_FLOAT) {
         throw_runtime_error("Operand must be number");
     }
@@ -49,8 +64,8 @@ struct MayValue* evaluate_urnary(struct Expr* expr) {
 }
 
 struct MayValue* evaluate_binary(struct Expr* expr) {
-    struct MayValue* left = evaluate(expr->as.binary.left);
-    struct MayValue* right = evaluate(expr->as.binary.right);
+    struct MayValue* left = evaluate_expr(expr->as.binary.left);
+    struct MayValue* right = evaluate_expr(expr->as.binary.right);
 
     if (left->type != MAY_FLOAT || right->type != MAY_FLOAT) {
         throw_runtime_error("Operands must be numbers");
