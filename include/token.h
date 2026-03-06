@@ -1,3 +1,4 @@
+struct MayValue;
 enum TokenType {
     LEFT_PAREN,
     RIGHT_PAREN,
@@ -36,5 +37,5 @@ struct Token {
     enum TokenType type;
     unsigned int line;
     char lexeme[256];
-    void* literal;
+    struct MayValue* literal;
 };

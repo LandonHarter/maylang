@@ -1,12 +1,22 @@
 #include "interpreter.h"
 #include "expression.h"
-#include <stdio.h>
+#include "types.h"
+#include "error.h"
 #include <stdlib.h>
 #include <string.h>
 
-void* evaluate(struct Expr* expr) {
+struct MayValue* evaluate(struct Expr* expr) {
     if (expr->type == EXPR_NUMBER) {
-        return &expr->as.number;
+        struct MayValue* result = malloc(sizeof(struct MayValue));
+        result->type = MAY_FLOAT;
+        result->as.floating = expr->as.number;
+        return result;
+    } else if (expr->type == EXPR_STRING) {
+        struct MayValue* result = malloc(sizeof(struct MayValue));
+        result->type = MAY_STRING;
+        result->as.string.val = expr->as.string;
+        result->as.string.len = strlen(expr->as.string);
+        return result;
     } else if (expr->type == EXPR_UNARY) {
         return evaluate_urnary(expr);
     } else if (expr->type == EXPR_BINARY) {
@@ -15,17 +25,21 @@ void* evaluate(struct Expr* expr) {
     return NULL;
 }
 
-void* evaluate_urnary(struct Expr* expr) {
-    void* right = evaluate(expr->as.unary.operand);
-    float rightf = *((float*)right);
+struct MayValue* evaluate_urnary(struct Expr* expr) {
+    struct MayValue* right = evaluate(expr->as.unary.operand);
+    if (right->type != MAY_FLOAT) {
+        throw_runtime_error("Operand must be number");
+    }
+    float rightf = right->as.floating;
 
-    float* result = malloc(sizeof(float));
+    struct MayValue* result = malloc(sizeof(struct MayValue));
+    result->type = MAY_FLOAT;
     switch (expr->as.unary.op) {
         case '-':
-            *result = -rightf;
+            result->as.floating = -rightf;
             break;
         case '!':
-            *result = rightf > 0 ? 0 : 1;
+            result->as.floating = rightf > 0 ? 0 : 1;
             break;
         default:
             free(result);
@@ -34,19 +48,24 @@ void* evaluate_urnary(struct Expr* expr) {
     return result;
 }
 
-void* evaluate_binary(struct Expr* expr) {
-    void* left = evaluate(expr->as.binary.left);
-    void* right = evaluate(expr->as.binary.right);
+struct MayValue* evaluate_binary(struct Expr* expr) {
+    struct MayValue* left = evaluate(expr->as.binary.left);
+    struct MayValue* right = evaluate(expr->as.binary.right);
 
-    float leftf = *((float*)left);
-    float rightf = *((float*)right);
+    if (left->type != MAY_FLOAT || right->type != MAY_FLOAT) {
+        throw_runtime_error("Operands must be numbers");
+    }
 
-    float* result = malloc(sizeof(float));
+    float leftf = left->as.floating;
+    float rightf = right->as.floating;
+
+    struct MayValue* result = malloc(sizeof(struct MayValue));
+    result->type = MAY_FLOAT;
     switch (expr->as.binary.op) {
-        case '+': *result = leftf + rightf; break;
-        case '-': *result = leftf - rightf; break;
-        case '*': *result = leftf * rightf; break;
-        case '/': *result = leftf / rightf; break;
+        case '+': result->as.floating = leftf + rightf; break;
+        case '-': result->as.floating = leftf - rightf; break;
+        case '*': result->as.floating = leftf * rightf; break;
+        case '/': result->as.floating = leftf / rightf; break;
         default: free(result); return NULL;
     }
     return result;

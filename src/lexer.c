@@ -30,7 +30,8 @@ int follows(struct LexerSource* src, const char* match) {
     return 1;
 }
 
-struct TokenList tokenize(char* src) {
+struct TokenList tokenize(struct Source* filesource) {
+    char* src = filesource->src;
     struct TokenList list = {NULL, 0, 0};
     struct LexerSource source = {src, 0, 1};
 
@@ -124,16 +125,16 @@ struct TokenList tokenize(char* src) {
                 append_token(&list, tok);
                 break;
             case '"':
-                struct GOMString str = {NULL, 0};
+                struct MayValue str = {MAY_STRING};
                 string_val(&source, &str);
 
                 tok.type = STRING;
                 tok.lexeme[0] = '"';
-                for (int j = 0; j < str.len; j++) {
-                    tok.lexeme[j + 1] = str.val[j];
+                for (int j = 0; j < str.as.string.len; j++) {
+                    tok.lexeme[j + 1] = str.as.string.val[j];
                 }
-                tok.lexeme[str.len + 1] = '"';
-                tok.lexeme[str.len + 2] = '\0';
+                tok.lexeme[str.as.string.len + 1] = '"';
+                tok.lexeme[str.as.string.len + 2] = '\0';
                 tok.literal = &str;
 
                 append_token(&list, tok);
@@ -156,11 +157,11 @@ struct TokenList tokenize(char* src) {
                 break;
             default:
                 if (is_digit(c)) {
-                    float num;
+                    struct MayValue num = {MAY_FLOAT};
                     number_val(&source, &num, &tok);
 
                     tok.type = NUMBER;
-                    snprintf(tok.lexeme, 256, "%f", num);
+                    snprintf(tok.lexeme, 256, "%f", num.as.floating);
                     tok.literal = &num;
 
                     append_token(&list, tok);
@@ -194,16 +195,17 @@ void free_token_list(struct TokenList* list) {
     list->capacity = 0;
 }
 
-void string_val(struct LexerSource* src, struct GOMString* str) {
+void string_val(struct LexerSource* src, struct MayValue* str) {
     src->idx++;
-    while (src->src[src->idx++] != '"') {
-        str->len++;
+    int start = src->idx;
+    while (src->src[src->idx] != '"' && src->src[src->idx] != '\0') {
+        src->idx++;
+        str->as.string.len++;
     }
-    src->idx -= 2;
-    str->val = src->src + src->idx - str->len + 1;
+    str->as.string.val = src->src + start;
 }
 
-void number_val(struct LexerSource* src, float* num, struct Token* tok) {
+void number_val(struct LexerSource* src, struct MayValue* num, struct Token* tok) {
     int len = 0;
     while (is_digit_or_dec(src->src[src->idx++])) {
         len++;
@@ -214,7 +216,7 @@ void number_val(struct LexerSource* src, float* num, struct Token* tok) {
     char digits[len + 1];
     strncpy(digits, src->src + src->idx - len + 1, len);
     digits[len] = '\0';
-    *num = (double) atof(digits);
+    num->as.floating = (double) atof(digits);
 
     for (int i = 0; i < len + 1; i++) {
         tok->lexeme[i] = digits[i];

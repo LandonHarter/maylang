@@ -1,6 +1,7 @@
 #include "may.h"
 
 struct Expr;
-void* evaluate(struct Expr* expr);
-void* evaluate_urnary(struct Expr* expr);
-void* evaluate_binary(struct Expr* expr);
+struct MayValue;
+struct MayValue* evaluate(struct Expr* expr);
+struct MayValue* evaluate_urnary(struct Expr* expr);
+struct MayValue* evaluate_binary(struct Expr* expr);

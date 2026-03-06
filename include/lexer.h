@@ -2,6 +2,7 @@
 #include "types.h"
 #include "keyword.h"
 #include "rules.h"
+#include "source.h"
 #include "may.h"
 
 struct LexerSource {
@@ -17,10 +18,10 @@ struct TokenList {
     size_t capacity;
 };
 
-struct TokenList tokenize(char* src);
+struct TokenList tokenize(struct Source* filesource);
 void free_token_list(struct TokenList* list);
 int follows(struct LexerSource* src, const char* match);
 
-void string_val(struct LexerSource* src, struct GOMString* str);
-void number_val(struct LexerSource* src, float* num, struct Token* tok);
+void string_val(struct LexerSource* src, struct MayValue* str);
+void number_val(struct LexerSource* src, struct MayValue* num, struct Token* tok);
 void identifier_val(struct LexerSource* src, struct Token* tok);

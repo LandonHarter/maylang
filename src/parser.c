@@ -1,10 +1,18 @@
 #include "parser.h"
 #include "lexer.h"
+#include <string.h>
 
 struct Expr* expr_number(float value) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_NUMBER;
     e->as.number = value;
+    return e;
+}
+
+struct Expr* expr_string(char* value) {
+    struct Expr* e = malloc(sizeof(struct Expr));
+    e->type = EXPR_STRING;
+    e->as.string = value;
     return e;
 }
 
@@ -37,6 +45,8 @@ void expr_free(struct Expr* expr) {
             break;
         case EXPR_NUMBER:
             break;
+        case EXPR_STRING:
+            break;
     }
     free(expr);
 }
@@ -60,6 +70,13 @@ static struct Expr* parse_primary(struct Parser* p) {
         struct Token* tok = advance(p);
         float val = atof(tok->lexeme);
         return expr_number(val);
+    } if (check(p, STRING)) {
+        struct Token* tok = advance(p);
+        int len = strlen(tok->lexeme) - 2;
+        char* val = malloc(len + 1);
+        strncpy(val, tok->lexeme + 1, len);
+        val[len] = '\0';
+        return expr_string(val);
     }
 
     if (check(p, LEFT_PAREN)) {

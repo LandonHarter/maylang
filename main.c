@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "interpreter.h"
+#include "source.h"
 #include <stdio.h>
 
 int main(int argc, char* argv[]) {
@@ -38,12 +39,16 @@ int main(int argc, char* argv[]) {
     fbuf[fsize] = '\0';
     fclose(fptr);
 
-    struct TokenList tokens = tokenize(fbuf);
+    struct Source source = {argv[1], fbuf};
+    struct TokenList tokens = tokenize(&source);
     free(fbuf);
 
     struct Expr* ast = parse(&tokens);
-    void* result = evaluate(ast);
-    printf("Result is %f\n", *((float*)result));
+    struct MayValue* result = evaluate(ast);
+    if (result->type == MAY_FLOAT)
+        printf("Result is %f\n", result->as.floating);
+    else if (result->type == MAY_STRING)
+        printf("Result is %s\n", result->as.string.val);
 
     expr_free(ast);
     free_token_list(&tokens);
