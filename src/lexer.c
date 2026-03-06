@@ -140,10 +140,6 @@ struct TokenList tokenize(struct Source* filesource) {
                 append_token(&list, tok);
                 break;
             case '\n':
-                if (!semicolon_ending(&source)) {
-                    fprintf(stderr, "Line %i must end with a semicolon", source.line);
-                    exit(-1);
-                }
                 source.line += 1;
                 break;
             case ' ': break;

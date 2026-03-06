@@ -65,19 +65,6 @@
     "output": "may"
   },
   {
-    "file": "src/rules.c",
-    "arguments": [
-      "gcc",
-      "-I",
-      "./include",
-      "src/rules.c",
-      "-o",
-      "may"
-    ],
-    "directory": "/home/landonh/projects/may-lang",
-    "output": "may"
-  },
-  {
     "file": "src/statement.c",
     "arguments": [
       "gcc",

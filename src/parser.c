@@ -153,7 +153,7 @@ static struct Stmt* parse_statement(struct Parser* p) {
     stmt->as.expr = parse_expression(p);
 
     if (!check(p, SEMICOLON)) {
-        fprintf(stderr, "Expected semicolon on line %i", peek(p)->line);
+        fprintf(stderr, "Expected semicolon on line %i", peek(p)->line - 1);
         exit(-1);
     }
     advance(p);
