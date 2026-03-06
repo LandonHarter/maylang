@@ -1,5 +1,18 @@
 [
   {
+    "file": "src/interpreter.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/interpreter.c",
+      "-o",
+      "may"
+    ],
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
+  },
+  {
     "file": "src/keyword.c",
     "arguments": [
       "gcc",

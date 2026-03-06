@@ -26,6 +26,7 @@ enum TokenType {
     EQUALS_EQUALS_EQUALS_EQUALS,
     NOT_EQUALS,
 
+    BANG,
     QUESTION,
 
     END_FILE

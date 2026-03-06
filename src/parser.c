@@ -82,6 +82,10 @@ static struct Expr* parse_unary(struct Parser* p) {
         advance(p);
         struct Expr* operand = parse_unary(p);
         return expr_unary('-', operand);
+    } else if (check(p, BANG)) {
+        advance(p);
+        struct Expr* operand= parse_unary(p);
+        return expr_unary('!', operand);
     }
     return parse_primary(p);
 }

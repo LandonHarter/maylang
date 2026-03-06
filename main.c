@@ -1,6 +1,8 @@
 #include "may.h"
 #include "lexer.h"
 #include "parser.h"
+#include "interpreter.h"
+#include <stdio.h>
 
 int main(int argc, char* argv[]) {
     #if defined(_WIN32) || defined(_WIN64)
@@ -40,6 +42,8 @@ int main(int argc, char* argv[]) {
     free(fbuf);
 
     struct Expr* ast = parse(&tokens);
+    void* result = evaluate(ast);
+    printf("Result is %f\n", *((float*)result));
 
     expr_free(ast);
     free_token_list(&tokens);

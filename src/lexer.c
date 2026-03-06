@@ -71,6 +71,11 @@ struct TokenList tokenize(char* src) {
                     tok.lexeme[1] = '=';
                     tok.lexeme[2] = '\0';
                     append_token(&list, tok);
+                } else {
+                    tok.type = BANG;
+                    tok.lexeme[0] = '!';
+                    tok.lexeme[1] = '\0';
+                    append_token(&list, tok);
                 }
                 break;
             case '?':
