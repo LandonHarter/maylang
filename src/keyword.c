@@ -1,18 +1,24 @@
 #include "keyword.h"
 #include "lexer.h"
-#include <stdio.h>
+#include <string.h>
 
-int matches_keyword(struct LexerSource* src, char* keyword, unsigned int len) {
-    for (int i = 0; i < len; i++) {
-        if (src->src[src->idx - len + 1 + i] != keyword[i]) {
+int matches_keyword(char* identifier, char* keyword) {
+    for (int i = 0; i < strlen(identifier); i++) {
+        if (identifier[i] != keyword[i]) {
             return 0;
         }
     }
     return 1;
 }
 
-void get_keyword(struct LexerSource* src, struct Token* tok, unsigned int len) {
-    if (matches_keyword(src, "void", len)) {
+void get_keyword(struct LexerSource* src, struct Token* tok) {
+    if (matches_keyword(tok->lexeme, "void")) {
         tok->type = VOID;
+    } else if (matches_keyword(tok->lexeme, "var")) {
+        tok->type = VAR;
+    } else if (matches_keyword(tok->lexeme, "float")) {
+        tok->type = VAR;
+    } else if (matches_keyword(tok->lexeme, "int")) {
+        tok->type = VAR;
     }
 }

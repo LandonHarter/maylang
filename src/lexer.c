@@ -124,18 +124,19 @@ struct TokenList tokenize(struct Source* filesource) {
                 tok.lexeme[num_equal] = '\0';
                 append_token(&list, tok);
                 break;
-            case '"':
-                struct MayValue str = {MAY_STRING};
-                string_val(&source, &str);
+            case '"':;
+                struct MayValue* str = malloc(sizeof(struct MayValue));
+                str->type = MAY_STRING;
+                string_val(&source, str);
 
                 tok.type = STRING;
                 tok.lexeme[0] = '"';
-                for (int j = 0; j < str.as.string.len; j++) {
-                    tok.lexeme[j + 1] = str.as.string.val[j];
+                for (int j = 0; j < str->as.string.len; j++) {
+                    tok.lexeme[j + 1] = str->as.string.val[j];
                 }
-                tok.lexeme[str.as.string.len + 1] = '"';
-                tok.lexeme[str.as.string.len + 2] = '\0';
-                tok.literal = &str;
+                tok.lexeme[str->as.string.len + 1] = '"';
+                tok.lexeme[str->as.string.len + 2] = '\0';
+                tok.literal = str;
 
                 append_token(&list, tok);
                 break;
@@ -153,12 +154,12 @@ struct TokenList tokenize(struct Source* filesource) {
                 break;
             default:
                 if (is_digit(c)) {
-                    struct MayValue num = {MAY_FLOAT};
-                    number_val(&source, &num, &tok);
+                    struct MayValue* num = malloc(sizeof(struct MayValue));
+                    num->type = MAY_FLOAT;
+                    number_val(&source, num, &tok);
 
                     tok.type = NUMBER;
-                    snprintf(tok.lexeme, 256, "%f", num.as.floating);
-                    tok.literal = &num;
+                    tok.literal = num;
 
                     append_token(&list, tok);
                 } else if (is_alpha(c)) {
@@ -233,5 +234,5 @@ void identifier_val(struct LexerSource* src, struct Token* tok) {
     }
     tok->lexeme[len] = '\0';
 
-    get_keyword(src, tok, len);
+    get_keyword(src, tok);
 }

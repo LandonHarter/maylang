@@ -1,5 +1,18 @@
 [
   {
+    "file": "src/env.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/env.c",
+      "-o",
+      "may"
+    ],
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
+  },
+  {
     "file": "src/error.c",
     "arguments": [
       "gcc",

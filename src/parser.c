@@ -18,6 +18,21 @@ struct Expr* expr_string(char* value) {
     return e;
 }
 
+struct Expr* expr_variable(char* name) {
+    struct Expr* e = malloc(sizeof(struct Expr));
+    e->type = EXPR_VARIABLE;
+    e->as.string = name;
+    return e;
+}
+
+struct Expr* expr_vardecl(char* name, struct Expr* initializer) {
+    struct Expr* e = malloc(sizeof(struct Expr));
+    e->type = EXPR_VARIABLEDECL;
+    e->as.vardecl.name = name;
+    e->as.vardecl.initializer = initializer;
+    return e;
+}
+
 struct Expr* expr_binary(struct Expr* left, struct Expr* right, char op) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_BINARY;
@@ -49,6 +64,12 @@ void expr_free(struct Expr* expr) {
             break;
         case EXPR_STRING:
             break;
+        case EXPR_VARIABLE:
+            break;
+        case EXPR_VARIABLEDECL:
+            expr_free(expr->as.vardecl.initializer);
+            free(expr->as.vardecl.name);
+            break;
     }
     free(expr);
 }
@@ -57,6 +78,7 @@ void stmt_free(struct Stmt* stmt) {
     if (!stmt) return;
     switch (stmt->type) {
         case STMT_EXPR:
+        case STMT_VARDECL:
             expr_free(stmt->as.expr);
             break;
     }
@@ -71,8 +93,20 @@ static struct Token* advance(struct Parser* p) {
     return &p->tokens[p->current++];
 }
 
+static struct Token* previous(struct Parser* p) {
+    return &p->tokens[p->current--];
+}
+
 static int check(struct Parser* p, enum TokenType type) {
     return peek(p)->type == type;
+}
+
+static int matches(char lexeme[], char* match) {
+    for (int i = 0; i  < 256; i++) {
+        if (lexeme[i] == '\0') break;
+        if (lexeme[i] != match[i]) return 0;
+    }
+    return 1;
 }
 
 static struct Expr* parse_expression(struct Parser* p);
@@ -89,9 +123,7 @@ static struct Expr* parse_primary(struct Parser* p) {
         strncpy(val, tok->lexeme + 1, len);
         val[len] = '\0';
         return expr_string(val);
-    }
-
-    if (check(p, LEFT_PAREN)) {
+    } if (check(p, LEFT_PAREN)) {
         advance(p);
         struct Expr* inner = parse_expression(p);
         if (!check(p, RIGHT_PAREN)) {
@@ -100,6 +132,33 @@ static struct Expr* parse_primary(struct Parser* p) {
         }
         advance(p);
         return inner;
+    } if (check(p, VAR)) {
+        advance(p);
+        struct Token* name = advance(p);
+
+        if (name->type != IDENTIFIER) {
+            printf("Cannot name variable %s\n", name->lexeme);
+            exit(-1);
+        }
+        int name_len = strlen(name->lexeme);
+        char* name_val = malloc(name_len + 1);
+        strncpy(name_val, name->lexeme, name_len);
+        name_val[name_len] = '\0';
+
+        struct Expr* initializer = NULL;
+        if (check(p, EQUALS)) {
+            advance(p);
+            initializer = parse_expression(p);
+        }
+
+        return expr_vardecl(name_val, initializer);
+    } if (check(p, IDENTIFIER)) {
+        struct Token* tok = advance(p);
+        int len = strlen(tok->lexeme);
+        char* name = malloc(len + 1);
+        strncpy(name, tok->lexeme, len);
+        name[len] = '\0';
+        return expr_variable(name);
     }
 
     fprintf(stderr, "Unexpected token '%s' on line %u\n", peek(p)->lexeme, peek(p)->line);
@@ -147,9 +206,14 @@ static struct Expr* parse_expression(struct Parser* p) {
     return parse_additive(p);
 }
 
-static struct Stmt* parse_statement(struct Parser* p) {
+static struct Stmt* parse_statement(struct Parser* p, struct Env* env) {
     struct Stmt* stmt = malloc(sizeof(struct Stmt));
-    stmt->type = STMT_EXPR;
+
+    if (check(p, VAR)) {
+        stmt->type = STMT_VARDECL;
+    } else {
+        stmt->type = STMT_EXPR;
+    }
     stmt->as.expr = parse_expression(p);
 
     if (!check(p, SEMICOLON)) {
@@ -161,12 +225,12 @@ static struct Stmt* parse_statement(struct Parser* p) {
     return stmt;
 }
 
-struct StmtList parse(struct TokenList* list) {
+struct StmtList parse(struct TokenList* list, struct Env* env) {
     struct Parser p = {list->tokens, list->count, 0};
     struct StmtList stmts = {NULL, 0, 0};
     while (!check(&p, END_FILE)) {
-        append_stmt(&stmts, parse_statement(&p));
+        append_stmt(&stmts, parse_statement(&p, env));
     }
-    
+
     return stmts;
 }

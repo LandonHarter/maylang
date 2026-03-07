@@ -2,7 +2,9 @@
 #include "lexer.h"
 #include "parser.h"
 #include "interpreter.h"
+#include "env.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char* argv[]) {
     #if defined(_WIN32) || defined(_WIN64)
@@ -42,11 +44,17 @@ int main(int argc, char* argv[]) {
     struct TokenList tokens = tokenize(&source);
     free(fbuf);
 
-    struct StmtList ast = parse(&tokens);
-    evaluate(&ast);
+    struct Env* env = malloc(sizeof(struct Env));
+    env->vars = malloc(sizeof(struct VarList));
+    env->vars->vars = NULL;
+    env->vars->count = 0;
+    env->vars->capacity = 0;
+    struct StmtList ast = parse(&tokens, env);
+    evaluate(&ast, env);
 
     free_stmt_list(&ast);
     free_token_list(&tokens);
+    free_env(env);
 
     return 0;
 }

@@ -20,6 +20,9 @@ enum TokenType {
     OR,
 
     VOID,
+    VAR,
+    INT,
+    FLOAT,
 
     SEMICOLON,
 

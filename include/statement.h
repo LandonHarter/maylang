@@ -3,7 +3,8 @@
 
 struct Expr;
 enum StmtType {
-    STMT_EXPR
+    STMT_EXPR,
+    STMT_VARDECL,
 };
 
 struct Stmt {
