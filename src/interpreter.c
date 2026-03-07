@@ -1,8 +1,10 @@
 #include "interpreter.h"
 #include "expression.h"
+#include "token.h"
 #include "types.h"
 #include "error.h"
 #include "statement.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,10 +16,16 @@ static void append_var(struct Env* env, struct Var* var) {
     env->vars->vars[env->vars->count++] = var;
 }
 
+static int is_numeric(struct MayValue* val) {
+    enum MayValueType t = val->type == MAY_VAR ? val->inferred : val->type;
+    return t == MAY_FLOAT || t == MAY_INT;
+}
+
 static struct MayValue* lookup_var(struct Env* env, const char* name) {
     for (size_t i = 0; i < env->vars->count; i++) {
-        if (strcmp(env->vars->vars[i]->name, name) == 0)
+        if (strcmp(env->vars->vars[i]->name, name) == 0) {
             return env->vars->vars[i]->value;
+        }
     }
     return NULL;
 }
@@ -42,6 +50,30 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         struct MayValue* value = NULL;
         if (expr->as.vardecl.initializer)
             value = evaluate_expr(expr->as.vardecl.initializer, env);
+
+        int decl = expr->as.vardecl.decl_type;
+        if (value) {
+            if (decl == VAR) {
+                value->inferred = value->type;
+                value->type = MAY_VAR;
+            } else if (decl == INT) {
+                if (value->type == MAY_FLOAT) {
+                    value->as.integer = (int)value->as.floating;
+                } else if (value->type != MAY_INT) {
+                    throw_runtime_error("Cannot assign non-integer to int variable");
+                }
+                value->type = MAY_INT;
+                value->inferred = MAY_INT;
+            } else if (decl == FLOAT) {
+                if (value->type == MAY_INT) {
+                    value->as.floating = (float)value->as.integer;
+                } else if (value->type != MAY_FLOAT) {
+                    throw_runtime_error("Cannot assign non-float to float variable");
+                }
+                value->type = MAY_FLOAT;
+                value->inferred = MAY_FLOAT;
+            }
+        }
 
         struct Var* var = malloc(sizeof(struct Var));
         var->name = strdup(expr->as.vardecl.name);
@@ -74,7 +106,7 @@ void evaluate(struct StmtList* list, struct Env* env) {
 
 struct MayValue* evaluate_urnary(struct Expr* expr, struct Env* env) {
     struct MayValue* right = evaluate_expr(expr->as.unary.operand, env);
-    if (right->type != MAY_FLOAT) {
+    if (!is_numeric(right)) {
         throw_runtime_error("Operand must be number");
     }
     float rightf = right->as.floating;
@@ -99,7 +131,7 @@ struct MayValue* evaluate_binary(struct Expr* expr, struct Env* env) {
     struct MayValue* left = evaluate_expr(expr->as.binary.left, env);
     struct MayValue* right = evaluate_expr(expr->as.binary.right, env);
 
-    if (left->type != MAY_FLOAT || right->type != MAY_FLOAT) {
+    if (!is_numeric(left) || !is_numeric(right)) {
         throw_runtime_error("Operands must be numbers");
     }
 

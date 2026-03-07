@@ -1,4 +1,5 @@
 enum MayValueType {
+    MAY_VAR,
     MAY_INT,
     MAY_FLOAT,
     MAY_STRING
@@ -6,7 +7,9 @@ enum MayValueType {
 
 struct MayValue {
     enum MayValueType type;
+    enum MayValueType inferred;
     union {
+        void* any;
         int integer;
         float floating;
         struct string {

@@ -25,11 +25,12 @@ struct Expr* expr_variable(char* name) {
     return e;
 }
 
-struct Expr* expr_vardecl(char* name, struct Expr* initializer) {
+struct Expr* expr_vardecl(char* name, struct Expr* initializer, int decl_type) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_VARIABLEDECL;
     e->as.vardecl.name = name;
     e->as.vardecl.initializer = initializer;
+    e->as.vardecl.decl_type = decl_type;
     return e;
 }
 
@@ -132,8 +133,9 @@ static struct Expr* parse_primary(struct Parser* p) {
         }
         advance(p);
         return inner;
-    } if (check(p, VAR)) {
-        advance(p);
+    } if (check(p, VAR) || check(p, INT) || check(p, FLOAT)) {
+        struct Token* type_tok = advance(p);
+        int decl_type = type_tok->type;
         struct Token* name = advance(p);
 
         if (name->type != IDENTIFIER) {
@@ -151,7 +153,7 @@ static struct Expr* parse_primary(struct Parser* p) {
             initializer = parse_expression(p);
         }
 
-        return expr_vardecl(name_val, initializer);
+        return expr_vardecl(name_val, initializer, decl_type);
     } if (check(p, IDENTIFIER)) {
         struct Token* tok = advance(p);
         int len = strlen(tok->lexeme);
@@ -209,7 +211,7 @@ static struct Expr* parse_expression(struct Parser* p) {
 static struct Stmt* parse_statement(struct Parser* p, struct Env* env) {
     struct Stmt* stmt = malloc(sizeof(struct Stmt));
 
-    if (check(p, VAR)) {
+    if (check(p, VAR) || check(p, INT) || check(p, FLOAT)) {
         stmt->type = STMT_VARDECL;
     } else {
         stmt->type = STMT_EXPR;
