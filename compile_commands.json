@@ -1,5 +1,18 @@
 [
   {
+    "file": "src/debug.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/debug.c",
+      "-o",
+      "may"
+    ],
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
+  },
+  {
     "file": "src/env.c",
     "arguments": [
       "gcc",
@@ -71,6 +84,19 @@
       "-I",
       "./include",
       "src/parser.c",
+      "-o",
+      "may"
+    ],
+    "directory": "/home/landonh/projects/may-lang",
+    "output": "may"
+  },
+  {
+    "file": "src/runtime.c",
+    "arguments": [
+      "gcc",
+      "-I",
+      "./include",
+      "src/runtime.c",
       "-o",
       "may"
     ],

@@ -2,7 +2,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "interpreter.h"
-#include "env.h"
+#include "runtime.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,8 +12,22 @@ int main(int argc, char* argv[]) {
         exit(-69);
     #endif
 
+    if (argc < 2) {
+        fprintf(stderr, "Invalid arguments");
+        return -1;
+    }
+
+    char* fpth = argv[argc - 1];
+    struct Runtime* runtime = malloc(sizeof(struct Runtime));
+    runtime->flags = 0;
+    set_global_runtime(runtime);
+
+    for (int i = 1; i < argc - 1; i++) {
+        enable_runtime_flag(argv[i], runtime);
+    }
+
     FILE* fptr;
-    fptr = fopen(argv[1], "r");
+    fptr = fopen(fpth, "r");
     if (fptr == NULL) {
         perror("Error opening file");
         return -1;
@@ -40,7 +54,7 @@ int main(int argc, char* argv[]) {
     fbuf[fsize] = '\0';
     fclose(fptr);
 
-    struct Source source = {argv[1], fbuf};
+    struct Source source = {fpth, fbuf};
     struct TokenList tokens = tokenize(&source);
     free(fbuf);
 
@@ -55,6 +69,7 @@ int main(int argc, char* argv[]) {
     free_stmt_list(&ast);
     free_token_list(&tokens);
     free_env(env);
+    free(runtime);
 
     return 0;
 }

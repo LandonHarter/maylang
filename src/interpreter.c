@@ -4,6 +4,7 @@
 #include "types.h"
 #include "error.h"
 #include "statement.h"
+#include "env.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
