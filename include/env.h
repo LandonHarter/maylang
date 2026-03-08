@@ -14,6 +14,8 @@ struct VarList {
 
 struct Env {
     struct VarList* vars;
+    struct Env* parent;
 };
 
+struct Env* new_env(struct Env* parent);
 void free_env(struct Env* env);

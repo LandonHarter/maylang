@@ -34,6 +34,22 @@ struct Expr* expr_vardecl(char* name, struct Expr* initializer, int decl_type) {
     return e;
 }
 
+struct Expr* expr_funcdecl(char* name, int decl_type, struct StmtList* body) {
+    struct Expr* e = malloc(sizeof(struct Expr));
+    e->type = EXPR_FUNCDECL;
+    e->as.funcdecl.name = name;
+    e->as.funcdecl.decl_type = decl_type;
+    e->as.funcdecl.func = body;
+    return e;
+}
+
+struct Expr* expr_return(struct Expr* val) {
+    struct Expr* e = malloc(sizeof(struct Expr));
+    e->type = EXPR_FUNCRETURN;
+    e->as.funcreturn.expr = val;
+    return e;
+}
+
 struct Expr* expr_binary(struct Expr* left, struct Expr* right, char op) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_BINARY;
@@ -71,6 +87,24 @@ void expr_free(struct Expr* expr) {
             expr_free(expr->as.vardecl.initializer);
             free(expr->as.vardecl.name);
             break;
+        case EXPR_FUNCDECL:
+            free(expr->as.funcdecl.name);
+            if (expr->as.funcdecl.func) {
+                free_stmt_list(expr->as.funcdecl.func);
+                free(expr->as.funcdecl.func);
+            }
+            break;
+        case EXPR_FUNC:
+            break;
+        case EXPR_CALL:
+            free(expr->as.call.name);
+            for (int i = 0; i < expr->as.call.arg_count; i++)
+                expr_free(expr->as.call.args[i]);
+            free(expr->as.call.args);
+            break;
+        case EXPR_FUNCRETURN:
+            expr_free(expr->as.funcreturn.expr);
+            break;
     }
     free(expr);
 }
@@ -80,6 +114,7 @@ void stmt_free(struct Stmt* stmt) {
     switch (stmt->type) {
         case STMT_EXPR:
         case STMT_VARDECL:
+        case STMT_FUNCDECL:
             expr_free(stmt->as.expr);
             break;
     }
@@ -111,6 +146,7 @@ static int matches(char lexeme[], char* match) {
 }
 
 static struct Expr* parse_expression(struct Parser* p);
+static struct StmtList parse_func(struct Parser* p);
 
 static struct Expr* parse_primary(struct Parser* p) {
     if (check(p, NUMBER)) {
@@ -151,6 +187,25 @@ static struct Expr* parse_primary(struct Parser* p) {
         if (check(p, EQUALS)) {
             advance(p);
             initializer = parse_expression(p);
+        } else if (check(p, LEFT_PAREN)) {
+            advance(p);
+            if (!check(p, RIGHT_PAREN)) {
+                printf("Expected )");
+                exit(-1);
+            }
+
+            advance(p);
+            if (!check(p, LEFT_BRACE)) {
+                printf("Expected {");
+                exit(-1);
+            }
+            advance(p);
+
+            struct StmtList body = parse_func(p);
+            advance(p);
+            struct StmtList* body_ptr = malloc(sizeof(struct StmtList));
+            *body_ptr = body;
+            return expr_funcdecl(name_val, decl_type, body_ptr);
         }
 
         return expr_vardecl(name_val, initializer, decl_type);
@@ -160,7 +215,41 @@ static struct Expr* parse_primary(struct Parser* p) {
         char* name = malloc(len + 1);
         strncpy(name, tok->lexeme, len);
         name[len] = '\0';
+
+        if (check(p, LEFT_PAREN)) {
+            advance(p);
+            struct Expr** args = NULL;
+            int arg_count = 0;
+            int arg_capacity = 0;
+
+            if (!check(p, RIGHT_PAREN)) {
+                do {
+                    if (arg_count >= arg_capacity) {
+                        arg_capacity = arg_capacity == 0 ? 4 : arg_capacity * 2;
+                        args = realloc(args, arg_capacity * sizeof(struct Expr*));
+                    }
+                    args[arg_count++] = parse_expression(p);
+                } while (check(p, COMMA) && advance(p));
+            }
+
+            if (!check(p, RIGHT_PAREN)) {
+                fprintf(stderr, "Expected ')' on line %u\n", peek(p)->line);
+                exit(-1);
+            }
+            advance(p);
+
+            struct Expr* e = malloc(sizeof(struct Expr));
+            e->type = EXPR_CALL;
+            e->as.call.name = name;
+            e->as.call.args = args;
+            e->as.call.arg_count = arg_count;
+            return e;
+        }
+
         return expr_variable(name);
+    } if (check(p, RETURN)) {
+        advance(p);
+        return expr_return(parse_expression(p));
     }
 
     fprintf(stderr, "Unexpected token '%s' on line %u\n", peek(p)->lexeme, peek(p)->line);
@@ -218,13 +307,26 @@ static struct Stmt* parse_statement(struct Parser* p, struct Env* env) {
     }
     stmt->as.expr = parse_expression(p);
 
+    if (stmt->as.expr->type == EXPR_FUNCDECL) {
+        stmt->type = STMT_FUNCDECL;
+        return stmt;
+    }
+
     if (!check(p, SEMICOLON)) {
-        fprintf(stderr, "Expected semicolon on line %i", peek(p)->line - 1);
+        fprintf(stderr, "Expected semicolon on line %i", peek(p)->line);
         exit(-1);
     }
     advance(p);
 
     return stmt;
+}
+
+static struct StmtList parse_func(struct Parser* p) {
+    struct StmtList stmts = {NULL, 0, 0};
+    while (!check(p, RIGHT_BRACE)) {
+        append_stmt(&stmts, parse_statement(p, NULL));
+    }
+    return stmts;
 }
 
 struct StmtList parse(struct TokenList* list, struct Env* env) {

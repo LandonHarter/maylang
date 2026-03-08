@@ -1,6 +1,16 @@
 #include "env.h"
 #include <stdlib.h>
 
+struct Env* new_env(struct Env* parent) {
+    struct Env* env = malloc(sizeof(struct Env));
+    env->vars = malloc(sizeof(struct VarList));
+    env->vars->vars = NULL;
+    env->vars->count = 0;
+    env->vars->capacity = 0;
+    env->parent = parent;
+    return env;
+}
+
 void free_val(struct MayValue* val) {
     free(val);
 }

@@ -82,6 +82,9 @@ struct TokenList tokenize(struct Source* filesource) {
             case '?':
                 append_basic_token(&list, &tok, QUESTION, &c);
                 break;
+            case ',':
+                append_basic_token(&list, &tok, COMMA, &c);
+                break;
             case ';':
                 append_basic_token(&list, &tok, SEMICOLON, &c);
                 break;

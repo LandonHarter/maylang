@@ -62,11 +62,7 @@ int main(int argc, char* argv[]) {
 
     debug_printf("Tokenization complete");
 
-    struct Env* env = malloc(sizeof(struct Env));
-    env->vars = malloc(sizeof(struct VarList));
-    env->vars->vars = NULL;
-    env->vars->count = 0;
-    env->vars->capacity = 0;
+    struct Env* env = new_env(NULL);
     struct StmtList ast = parse(&tokens, env);
     debug_printf("Generated AST");
 

@@ -13,6 +13,7 @@ enum TokenType {
     DIVIDE,
 
     IDENTIFIER,
+    RETURN,
     STRING,
     NUMBER,
 
@@ -24,6 +25,7 @@ enum TokenType {
     INT,
     FLOAT,
 
+    COMMA,
     SEMICOLON,
 
     EQUALS,

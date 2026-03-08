@@ -5,6 +5,7 @@ struct Expr;
 enum StmtType {
     STMT_EXPR,
     STMT_VARDECL,
+    STMT_FUNCDECL,
 };
 
 struct Stmt {

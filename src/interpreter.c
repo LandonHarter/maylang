@@ -23,9 +23,11 @@ static int is_numeric(struct MayValue* val) {
 }
 
 static struct MayValue* lookup_var(struct Env* env, const char* name) {
-    for (size_t i = 0; i < env->vars->count; i++) {
-        if (strcmp(env->vars->vars[i]->name, name) == 0) {
-            return env->vars->vars[i]->value;
+    for (struct Env* e = env; e != NULL; e = e->parent) {
+        for (size_t i = 0; i < e->vars->count; i++) {
+            if (strcmp(e->vars->vars[i]->name, name) == 0) {
+                return e->vars->vars[i]->value;
+            }
         }
     }
     return NULL;
@@ -82,6 +84,45 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         var->value = value;
         append_var(env, var);
         return value;
+    } else if (expr->type == EXPR_FUNCDECL) {
+        struct MayValue* value = malloc(sizeof(struct MayValue));
+        value->type = MAY_FUNC;
+        value->as.func.name = strdup(expr->as.funcdecl.name);
+        value->as.func.body = expr->as.funcdecl.func;
+        value->as.func.return_type = expr->as.funcdecl.decl_type;
+
+        struct Var* var = malloc(sizeof(struct Var));
+        var->name = strdup(expr->as.funcdecl.name);
+        var->value = value;
+        append_var(env, var);
+        return value;
+    } else if (expr->type == EXPR_FUNCRETURN) {
+        struct MayValue* val = evaluate_expr(expr->as.funcreturn.expr, env);
+        struct MayValue* ret = malloc(sizeof(struct MayValue));
+        *ret = *val;
+        ret->inferred = val->type;
+        ret->type = MAY_RETURN;
+        return ret;
+    } else if (expr->type == EXPR_CALL) {
+        struct MayValue* func = lookup_var(env, expr->as.call.name);
+        if (!func) {
+            throw_runtime_error("Undefined function");
+        }
+        if (func->type != MAY_FUNC) {
+            throw_runtime_error("Not a function");
+        }
+
+        struct Env* call_env = new_env(env);
+        struct MayValue* result = NULL;
+        for (int i = 0; i < func->as.func.body->count; i++) {
+            result = evaluate_stmt(func->as.func.body->stmts[i], call_env);
+            if (result && result->type == MAY_RETURN) {
+                result->type = result->inferred;
+                break;
+            }
+        }
+        free_env(call_env);
+        return result;
     } else if (expr->type == EXPR_VARIABLE) {
         struct MayValue* value = lookup_var(env, expr->as.string);
         if (!value) {
@@ -94,7 +135,7 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
 }
 
 struct MayValue* evaluate_stmt(struct Stmt* stmt, struct Env* env) {
-    if (stmt->type == STMT_EXPR || stmt->type == STMT_VARDECL) {
+    if (stmt->type == STMT_EXPR || stmt->type == STMT_VARDECL || stmt->type == STMT_FUNCDECL) {
         return evaluate_expr(stmt->as.expr, env);
     }
     return NULL;

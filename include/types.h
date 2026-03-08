@@ -1,8 +1,18 @@
+struct StmtList;
+
 enum MayValueType {
     MAY_VAR,
     MAY_INT,
     MAY_FLOAT,
-    MAY_STRING
+    MAY_STRING,
+    MAY_FUNC,
+    MAY_RETURN
+};
+
+struct MayFunc {
+    char* name;
+    struct StmtList* body;
+    int return_type;
 };
 
 struct MayValue {
@@ -16,6 +26,7 @@ struct MayValue {
             char* val;
             int len;
         } string;
+        struct MayFunc func;
     } as;
 };
 

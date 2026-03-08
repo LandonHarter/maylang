@@ -20,5 +20,7 @@ void get_keyword(struct LexerSource* src, struct Token* tok) {
         tok->type = FLOAT;
     } else if (matches_keyword(tok->lexeme, "int")) {
         tok->type = INT;
+    } else if (matches_keyword(tok->lexeme, "return")) {
+        tok->type = RETURN;
     }
 }
