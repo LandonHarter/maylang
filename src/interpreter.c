@@ -9,14 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void append_var(struct Env* env, struct Var* var) {
-    if (env->vars->count >= env->vars->capacity) {
-        env->vars->capacity = env->vars->capacity == 0 ? 8 : env->vars->capacity * 2;
-        env->vars->vars = realloc(env->vars->vars, env->vars->capacity * sizeof(struct Var));
-    }
-    env->vars->vars[env->vars->count++] = var;
-}
-
 static int is_numeric(struct MayValue* val) {
     enum MayValueType t = val->type == MAY_VAR ? val->inferred : val->type;
     return t == MAY_FLOAT || t == MAY_INT;
@@ -108,12 +100,16 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         if (!func) {
             throw_runtime_error("Undefined function");
         }
-        if (func->type != MAY_FUNC) {
+        if (func->type != MAY_FUNC && func->type != MAY_BUILTIN_FUNC) {
             throw_runtime_error("Not a function");
         }
 
-        struct Env* call_env = new_env(env);
+        if (func->type == MAY_BUILTIN_FUNC) {
+            return func->as.builtin.cfunc(NULL, 0);
+        }
+
         struct MayValue* result = NULL;
+        struct Env* call_env = new_env(env);
         for (int i = 0; i < func->as.func.body->count; i++) {
             result = evaluate_stmt(func->as.func.body->stmts[i], call_env);
             if (result && result->type == MAY_RETURN) {
@@ -144,6 +140,7 @@ struct MayValue* evaluate_stmt(struct Stmt* stmt, struct Env* env) {
 void evaluate(struct StmtList* list, struct Env* env) {
     for (int i = 0; i < list->count; i++) {
         struct MayValue* ret = evaluate_stmt(list->stmts[i], env);
+        printmv(ret);
     }
 }
 

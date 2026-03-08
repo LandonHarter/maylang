@@ -1,4 +1,7 @@
+struct MayValue;
 struct StmtList;
+
+typedef struct MayValue* (*MayNativeFn)(struct MayValue** args, int arg_count);
 
 enum MayValueType {
     MAY_VAR,
@@ -6,6 +9,7 @@ enum MayValueType {
     MAY_FLOAT,
     MAY_STRING,
     MAY_FUNC,
+    MAY_BUILTIN_FUNC,
     MAY_RETURN
 };
 
@@ -13,6 +17,12 @@ struct MayFunc {
     char* name;
     struct StmtList* body;
     int return_type;
+};
+
+struct MayBuiltinFunc {
+    char* name;
+    int return_type;
+    MayNativeFn cfunc;
 };
 
 struct MayValue {
@@ -27,6 +37,7 @@ struct MayValue {
             int len;
         } string;
         struct MayFunc func;
+        struct MayBuiltinFunc builtin;
     } as;
 };
 

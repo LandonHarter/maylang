@@ -20,6 +20,7 @@ int is_alphanumeric(char c) {
 }
 
 void printmv(struct MayValue* val) {
+    if (!val) return;
     switch (val->type) {
         case MAY_INT:
             printf("%i", val->as.integer);

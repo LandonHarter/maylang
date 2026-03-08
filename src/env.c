@@ -1,5 +1,7 @@
 #include "env.h"
+#include "types.h"
 #include <stdlib.h>
+#include <string.h>
 
 struct Env* new_env(struct Env* parent) {
     struct Env* env = malloc(sizeof(struct Env));
@@ -31,4 +33,24 @@ void free_env(struct Env* env) {
     if (env->vars)
         free_var_list(env->vars);
     free(env);
+}
+
+void append_var(struct Env* env, struct Var* var) {
+    if (env->vars->count >= env->vars->capacity) {
+        env->vars->capacity = env->vars->capacity == 0 ? 8 : env->vars->capacity * 2;
+        env->vars->vars = realloc(env->vars->vars, env->vars->capacity * sizeof(struct Var*));
+    }
+    env->vars->vars[env->vars->count++] = var;
+}
+
+void register_builtin(struct Env* env, const char* name, MayNativeFn fn) {
+    struct MayValue* value = malloc(sizeof(struct MayValue));
+    value->type = MAY_BUILTIN_FUNC;
+    value->as.builtin.name = strdup(name);
+    value->as.builtin.cfunc = fn;
+
+    struct Var* var = malloc(sizeof(struct Var));
+    var->name = strdup(name);
+    var->value = value;
+    append_var(env, var);
 }
