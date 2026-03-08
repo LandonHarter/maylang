@@ -54,9 +54,13 @@ int main(int argc, char* argv[]) {
     fbuf[fsize] = '\0';
     fclose(fptr);
 
+    debug_printf("Read file: %s", fpth);
+
     struct Source source = {fpth, fbuf};
     struct TokenList tokens = tokenize(&source);
     free(fbuf);
+
+    debug_printf("Tokenization complete");
 
     struct Env* env = malloc(sizeof(struct Env));
     env->vars = malloc(sizeof(struct VarList));
@@ -64,6 +68,8 @@ int main(int argc, char* argv[]) {
     env->vars->count = 0;
     env->vars->capacity = 0;
     struct StmtList ast = parse(&tokens, env);
+    debug_printf("Generated AST");
+
     evaluate(&ast, env);
 
     free_stmt_list(&ast);

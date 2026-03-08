@@ -57,6 +57,7 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
             if (decl == VAR) {
                 value->inferred = value->type;
                 value->type = MAY_VAR;
+                debug_printf("It is recommended to use a definite type instead of var");
             } else if (decl == INT) {
                 if (value->type == MAY_FLOAT) {
                     value->as.integer = (int)value->as.floating;
