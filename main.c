@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
     debug_printf("Tokenization complete");
 
     struct Env* env = new_env(NULL);
-    register_builtin(env, "print_helloworld", builtin_print);
+    register_builtin(env, "print", builtin_print);
 
     struct StmtList ast = parse(&tokens, env);
     debug_printf("Generated AST");

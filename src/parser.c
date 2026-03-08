@@ -34,12 +34,14 @@ struct Expr* expr_vardecl(char* name, struct Expr* initializer, int decl_type) {
     return e;
 }
 
-struct Expr* expr_funcdecl(char* name, int decl_type, struct StmtList* body) {
+struct Expr* expr_funcdecl(char* name, int decl_type, struct StmtList* body, struct Param* params, int param_count) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_FUNCDECL;
     e->as.funcdecl.name = name;
     e->as.funcdecl.decl_type = decl_type;
     e->as.funcdecl.func = body;
+    e->as.funcdecl.params = params;
+    e->as.funcdecl.param_count = param_count;
     return e;
 }
 
@@ -93,6 +95,9 @@ void expr_free(struct Expr* expr) {
                 free_stmt_list(expr->as.funcdecl.func);
                 free(expr->as.funcdecl.func);
             }
+            for (int i = 0; i < expr->as.funcdecl.param_count; i++)
+                free(expr->as.funcdecl.params[i].name);
+            free(expr->as.funcdecl.params);
             break;
         case EXPR_FUNC:
             break;
@@ -189,14 +194,43 @@ static struct Expr* parse_primary(struct Parser* p) {
             initializer = parse_expression(p);
         } else if (check(p, LEFT_PAREN)) {
             advance(p);
+
+            struct Param* params = NULL;
+            int param_count = 0;
+            int param_capacity = 0;
+
             if (!check(p, RIGHT_PAREN)) {
-                printf("Expected )");
-                exit(-1);
+                do {
+                    if (!check(p, VAR) && !check(p, INT) && !check(p, FLOAT)) {
+                        printf("Expected parameter type on line %u\n", peek(p)->line);
+                        exit(-1);
+                    }
+                    int ptype = advance(p)->type;
+
+                    if (!check(p, IDENTIFIER)) {
+                        printf("Expected parameter name on line %u\n", peek(p)->line);
+                        exit(-1);
+                    }
+                    struct Token* pname = advance(p);
+
+                    if (param_count >= param_capacity) {
+                        param_capacity = param_capacity == 0 ? 4 : param_capacity * 2;
+                        params = realloc(params, param_capacity * sizeof(struct Param));
+                    }
+                    params[param_count].name = strdup(pname->lexeme);
+                    params[param_count].type = ptype;
+                    param_count++;
+                } while (check(p, COMMA) && advance(p));
             }
 
+            if (!check(p, RIGHT_PAREN)) {
+                printf("Expected ) on line %u\n", peek(p)->line);
+                exit(-1);
+            }
             advance(p);
+
             if (!check(p, LEFT_BRACE)) {
-                printf("Expected {");
+                printf("Expected { on line %u\n", peek(p)->line);
                 exit(-1);
             }
             advance(p);
@@ -205,7 +239,7 @@ static struct Expr* parse_primary(struct Parser* p) {
             advance(p);
             struct StmtList* body_ptr = malloc(sizeof(struct StmtList));
             *body_ptr = body;
-            return expr_funcdecl(name_val, decl_type, body_ptr);
+            return expr_funcdecl(name_val, decl_type, body_ptr, params, param_count);
         }
 
         return expr_vardecl(name_val, initializer, decl_type);

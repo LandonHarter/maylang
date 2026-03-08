@@ -82,6 +82,8 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         value->as.func.name = strdup(expr->as.funcdecl.name);
         value->as.func.body = expr->as.funcdecl.func;
         value->as.func.return_type = expr->as.funcdecl.decl_type;
+        value->as.func.params = expr->as.funcdecl.params;
+        value->as.func.param_count = expr->as.funcdecl.param_count;
 
         struct Var* var = malloc(sizeof(struct Var));
         var->name = strdup(expr->as.funcdecl.name);
@@ -105,11 +107,54 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         }
 
         if (func->type == MAY_BUILTIN_FUNC) {
-            return func->as.builtin.cfunc(NULL, 0);
+            struct MayValue** args = NULL;
+            int argc = expr->as.call.arg_count;
+            if (argc > 0) {
+                args = malloc(argc * sizeof(struct MayValue*));
+                for (int i = 0; i < argc; i++)
+                    args[i] = evaluate_expr(expr->as.call.args[i], env);
+            }
+            struct MayValue* ret = func->as.builtin.cfunc(args, argc);
+            free(args);
+            return ret;
+        }
+
+        if (expr->as.call.arg_count != func->as.func.param_count) {
+            throw_runtime_error("Wrong number of arguments");
         }
 
         struct MayValue* result = NULL;
         struct Env* call_env = new_env(env);
+
+        for (int i = 0; i < func->as.func.param_count; i++) {
+            struct MayValue* arg_val = evaluate_expr(expr->as.call.args[i], env);
+            struct MayValue* param_val = malloc(sizeof(struct MayValue));
+            *param_val = *arg_val;
+
+            int ptype = func->as.func.params[i].type;
+            if (ptype == INT) {
+                if (param_val->type == MAY_FLOAT) {
+                    param_val->as.integer = (int)param_val->as.floating;
+                }
+                param_val->type = MAY_INT;
+                param_val->inferred = MAY_INT;
+            } else if (ptype == FLOAT) {
+                if (param_val->type == MAY_INT) {
+                    param_val->as.floating = (float)param_val->as.integer;
+                }
+                param_val->type = MAY_FLOAT;
+                param_val->inferred = MAY_FLOAT;
+            } else {
+                param_val->inferred = param_val->type;
+                param_val->type = MAY_VAR;
+            }
+
+            struct Var* var = malloc(sizeof(struct Var));
+            var->name = strdup(func->as.func.params[i].name);
+            var->value = param_val;
+            append_var(call_env, var);
+        }
+
         for (int i = 0; i < func->as.func.body->count; i++) {
             result = evaluate_stmt(func->as.func.body->stmts[i], call_env);
             if (result && result->type == MAY_RETURN) {
@@ -149,7 +194,7 @@ struct MayValue* evaluate_urnary(struct Expr* expr, struct Env* env) {
     if (!is_numeric(right)) {
         throw_runtime_error("Operand must be number");
     }
-    float rightf = right->as.floating;
+    float rightf = right->type == MAY_INT ? (float)right->as.integer : right->as.floating;
 
     struct MayValue* result = malloc(sizeof(struct MayValue));
     result->type = MAY_FLOAT;
@@ -175,8 +220,8 @@ struct MayValue* evaluate_binary(struct Expr* expr, struct Env* env) {
         throw_runtime_error("Operands must be numbers");
     }
 
-    float leftf = left->as.floating;
-    float rightf = right->as.floating;
+    float leftf = left->type == MAY_INT ? (float)left->as.integer : left->as.floating;
+    float rightf = right->type == MAY_INT ? (float)right->as.integer : right->as.floating;
 
     struct MayValue* result = malloc(sizeof(struct MayValue));
     result->type = MAY_FLOAT;

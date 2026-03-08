@@ -198,6 +198,7 @@ void free_token_list(struct TokenList* list) {
 void string_val(struct LexerSource* src, struct MayValue* str) {
     src->idx++;
     int start = src->idx;
+    str->as.string.len = 0;
     while (src->src[src->idx] != '"' && src->src[src->idx] != '\0') {
         src->idx++;
         str->as.string.len++;

@@ -13,10 +13,14 @@ enum MayValueType {
     MAY_RETURN
 };
 
+struct Param;
+
 struct MayFunc {
     char* name;
     struct StmtList* body;
     int return_type;
+    struct Param* params;
+    int param_count;
 };
 
 struct MayBuiltinFunc {
