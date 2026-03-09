@@ -54,3 +54,5 @@ int is_alphanumeric(char c);
 
 void printmv(struct MayValue* val);
 void printmv_col(struct MayValue* val, char* color);
+
+char* mvtypestr(enum MayValueType type);

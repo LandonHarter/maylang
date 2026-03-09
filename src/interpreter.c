@@ -260,30 +260,43 @@ struct MayValue* evaluate_urnary(struct Expr* expr, struct Env* env) {
 struct MayValue* evaluate_binary(struct Expr* expr, struct Env* env) {
     struct MayValue* left = evaluate_expr(expr->as.binary.left, env);
     struct MayValue* right = evaluate_expr(expr->as.binary.right, env);
-
-    if (!is_numeric(left) || !is_numeric(right)) {
-        throw_runtime_error("Operands must be numbers");
-    }
-
-    float leftf = left->type == MAY_INT ? (float)left->as.integer : left->as.floating;
-    float rightf = right->type == MAY_INT ? (float)right->as.integer : right->as.floating;
-
     struct MayValue* result = malloc(sizeof(struct MayValue));
-    result->type = MAY_FLOAT;
-    switch (expr->as.binary.op) {
-        case '+': result->as.floating = leftf + rightf; break;
-        case '-': result->as.floating = leftf - rightf; break;
-        case '*': result->as.floating = leftf * rightf; break;
-        case '/': result->as.floating = leftf / rightf; break;
-        case 'e': result->as.floating = leftf == rightf ? 1 : 0; break;
-        case 'n': result->as.floating = leftf != rightf ? 1 : 0; break;
-        case 'g': result->as.floating = leftf >= rightf ? 1 : 0; break;
-        case 'm': result->as.floating = leftf > rightf ? 1 : 0; break;
-        case 'l': result->as.floating = leftf <= rightf ? 1 : 0; break;
-        case 'u': result->as.floating = leftf < rightf ? 1 : 0; break;
-        case 'a': result->as.floating = (leftf == 1 && rightf == 1) ? 1 : 0; break;
-        case 'o': result->as.floating = (leftf == 1 || rightf == 1) ? 1 : 0; break;
-        default: free(result); return NULL;
+
+    if (is_numeric(left) && is_numeric(right)) {
+        float leftf = left->type == MAY_INT ? (float)left->as.integer : left->as.floating;
+        float rightf = right->type == MAY_INT ? (float)right->as.integer : right->as.floating;
+
+        result->type = MAY_FLOAT;
+        switch (expr->as.binary.op) {
+            case '+': result->as.floating = leftf + rightf; break;
+            case '-': result->as.floating = leftf - rightf; break;
+            case '*': result->as.floating = leftf * rightf; break;
+            case '/': result->as.floating = leftf / rightf; break;
+            case 'e': result->as.floating = leftf == rightf ? 1 : 0; break;
+            case 'n': result->as.floating = leftf != rightf ? 1 : 0; break;
+            case 'g': result->as.floating = leftf >= rightf ? 1 : 0; break;
+            case 'm': result->as.floating = leftf > rightf ? 1 : 0; break;
+            case 'l': result->as.floating = leftf <= rightf ? 1 : 0; break;
+            case 'u': result->as.floating = leftf < rightf ? 1 : 0; break;
+            case 'a': result->as.floating = (leftf == 1 && rightf == 1) ? 1 : 0; break;
+            case 'o': result->as.floating = (leftf == 1 || rightf == 1) ? 1 : 0; break;
+            default: free(result); return NULL;
+        }
+        return result;
+    } else if (left->type == MAY_STRING && right->type == MAY_STRING && expr->as.binary.op == '+') {
+        result->type = MAY_STRING;
+        int left_len = strlen(left->as.string.val);
+        int right_len = strlen(right->as.string.val);
+        char* resstr = malloc(left_len + right_len + 1);
+        memcpy(resstr, left->as.string.val, left_len);
+        memcpy(resstr + left_len, right->as.string.val, right_len);
+        resstr[left_len + right_len] = '\0';
+        result->as.string.val = resstr;
+        result->as.string.len = left_len + right_len;
+        return result;
     }
-    return result;
+
+    fprintf(stderr, "Cannot %c types %s and %s\n", expr->as.binary.op, mvtypestr(left->type), mvtypestr(right->type));
+    exit(-1);
+    return NULL;
 }

@@ -68,3 +68,16 @@ void printmv_col(struct MayValue* val, char* color) {
             printf("%s%s%s\n", color_ansi, val->as.func.name, COLOR_RESET);
     }
 }
+
+char* mvtypestr(enum MayValueType type) {
+    switch (type) {
+        case MAY_INT:
+            return "int";
+        case MAY_FLOAT:
+            return "float";
+        case MAY_STRING:
+            return "string";
+        default:
+            return NULL;
+    }
+}
