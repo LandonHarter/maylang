@@ -181,6 +181,13 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         return value;
     } else if (expr->type == EXPR_IMPORT) {
         load_module(env, expr->as.import.lib);
+    } else if (expr->type == EXPR_IF) {
+        struct Expr* cond_expr = expr->as.ifcond.condition;
+        struct MayValue* cond = evaluate_expr(cond_expr, env);
+        if (cond->type == MAY_FLOAT && cond->as.floating == 1) {
+            struct Env* ifenv = new_env(env);
+            evaluate(expr->as.ifcond.thenbody, ifenv);
+        }
     }
 
     return NULL;
@@ -240,6 +247,8 @@ struct MayValue* evaluate_binary(struct Expr* expr, struct Env* env) {
         case '-': result->as.floating = leftf - rightf; break;
         case '*': result->as.floating = leftf * rightf; break;
         case '/': result->as.floating = leftf / rightf; break;
+        case 'e': result->as.floating = leftf == rightf ? 1 : 0; break;
+        case 'n': result->as.floating = leftf != rightf ? 1 : 0; break;
         default: free(result); return NULL;
     }
     return result;

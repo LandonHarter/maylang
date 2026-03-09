@@ -6,6 +6,7 @@ enum StmtType {
     STMT_EXPR,
     STMT_VARDECL,
     STMT_FUNCDECL,
+    STMT_IF,
 };
 
 struct Stmt {

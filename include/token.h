@@ -18,6 +18,7 @@ enum TokenType {
     STRING,
     NUMBER,
 
+    IF,
     AND,
     OR,
 
@@ -30,8 +31,6 @@ enum TokenType {
 
     EQUALS,
     EQUALS_EQUALS,
-    EQUALS_EQUALS_EQUALS,
-    EQUALS_EQUALS_EQUALS_EQUALS,
     NOT_EQUALS,
 
     BANG,

@@ -59,6 +59,15 @@ struct Expr* expr_import(char* lib) {
     return e;
 }
 
+struct Expr* expr_if(struct Expr* condition, struct StmtList* thenbody, struct StmtList* elsebody) {
+    struct Expr* e = malloc(sizeof(struct Expr));
+    e->type = EXPR_IF;
+    e->as.ifcond.condition = condition;
+    e->as.ifcond.thenbody = thenbody;
+    e->as.ifcond.elsebody = elsebody;
+    return e;
+}
+
 struct Expr* expr_binary(struct Expr* left, struct Expr* right, char op) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_BINARY;
@@ -108,6 +117,11 @@ void expr_free(struct Expr* expr) {
                 free(expr->as.funcdecl.params[i].name);
             free(expr->as.funcdecl.params);
             break;
+        case EXPR_IF:
+            expr_free(expr->as.ifcond.condition);
+            free_stmt_list(expr->as.ifcond.thenbody);
+            free_stmt_list(expr->as.ifcond.elsebody);
+            break;
         case EXPR_FUNC:
             break;
         case EXPR_CALL:
@@ -128,6 +142,7 @@ void stmt_free(struct Stmt* stmt) {
     switch (stmt->type) {
         case STMT_EXPR:
         case STMT_VARDECL:
+        case STMT_IF:
         case STMT_FUNCDECL:
             expr_free(stmt->as.expr);
             break;
@@ -303,6 +318,26 @@ static struct Expr* parse_primary(struct Parser* p) {
         struct Token* lib = peek(p);
         advance(p);
         return expr_import(lib->literal->as.string.val);
+    } if (check(p, IF)) {
+        struct Token* tok = advance(p); 
+        if (!check(p, LEFT_PAREN)) {
+            fprintf(stderr, "Expected '(' on line %u\n", peek(p)->line);
+            exit(-1);
+        }
+
+        struct Expr* condition = parse_expression(p);
+        if (!check(p, LEFT_BRACE)) {
+            fprintf(stderr, "Expected '{' on line %u\n", peek(p)->line);
+            exit(-1);
+        }
+        advance(p);
+
+        struct StmtList thenbody = parse_func(p);
+        advance(p);
+        struct StmtList* thenbody_ptr = malloc(sizeof(struct StmtList));
+        *thenbody_ptr = thenbody;
+
+        return expr_if(condition, thenbody_ptr, NULL);
     }
 
     fprintf(stderr, "Unexpected token '%s' on line %u\n", peek(p)->lexeme, peek(p)->line);
@@ -337,8 +372,12 @@ static struct Expr* parse_multiplicative(struct Parser* p) {
 static struct Expr* parse_additive(struct Parser* p) {
     struct Expr* left = parse_multiplicative(p);
 
-    while (check(p, PLUS) || check(p, MINUS)) {
-        char op = advance(p)->lexeme[0];
+    while (check(p, PLUS) || check(p, MINUS) || check(p, EQUALS_EQUALS) || check(p, NOT_EQUALS)) {
+        char op;
+        if (check(p, EQUALS_EQUALS)) op = 'e';
+        else if (check(p, NOT_EQUALS)) op = 'n';
+        else op = peek(p)->lexeme[0];
+        advance(p);
         struct Expr* right = parse_multiplicative(p);
         left = expr_binary(left, right, op);
     }
@@ -362,6 +401,10 @@ static struct Stmt* parse_statement(struct Parser* p, struct Env* env) {
 
     if (stmt->as.expr->type == EXPR_FUNCDECL) {
         stmt->type = STMT_FUNCDECL;
+        return stmt;
+    }
+
+    if (stmt->as.expr->type == EXPR_IF) {
         return stmt;
     }
 

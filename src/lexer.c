@@ -107,24 +107,17 @@ struct TokenList tokenize(struct Source* filesource) {
                 }
                 break;
             case '=':
-                int num_equal = 1;
-                if (follows(&source, "===")) {
-                    tok.type = EQUALS_EQUALS_EQUALS_EQUALS;
-                    num_equal = 4;
-                } else if (follows(&source, "==")) {
-                    tok.type = EQUALS_EQUALS_EQUALS;
-                    num_equal = 3;
-                } else if (follows(&source, "=")) {
+                if (follows(&source, "=")) {
                     tok.type = EQUALS_EQUALS;
-                    num_equal = 2;
+                    tok.lexeme[0] = '=';
+                    tok.lexeme[1] = '=';
+                    tok.lexeme[2] = '\0';
                 } else {
                     tok.type = EQUALS;
+                    tok.lexeme[0] = '=';
+                    tok.lexeme[1] = '\0';
                 }
 
-                for (int j = 0; j < num_equal; j++) {
-                    tok.lexeme[j] = '=';
-                }
-                tok.lexeme[num_equal] = '\0';
                 append_token(&list, tok);
                 break;
             case '"':;

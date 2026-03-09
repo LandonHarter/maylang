@@ -13,6 +13,7 @@ enum ExprType {
     EXPR_FUNCRETURN,
     EXPR_CALL,
     EXPR_IMPORT,
+    EXPR_IF,
     EXPR_BINARY,
     EXPR_UNARY
 };
@@ -51,6 +52,12 @@ struct Expr {
         struct {
             char* lib;
         } import;
+
+        struct {
+            struct Expr* condition;
+            struct StmtList* thenbody;
+            struct StmtList* elsebody;
+        } ifcond;
 
         struct {
             struct Expr* left;
