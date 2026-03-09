@@ -44,6 +44,14 @@ struct MayValue* math_ceil(struct MayValue** args, int arg_count) {
     return ret;
 }
 
+struct MayValue* math_round(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = roundf(num->as.floating);
+    return ret;
+}
+
 struct MayValue* math_pow(struct MayValue** args, int arg_count) {
     struct MayValue* num = args[0];
     struct MayValue* power = args[1];
@@ -101,6 +109,96 @@ struct MayValue* math_atan(struct MayValue** args, int arg_count) {
     return ret;
 }
 
+struct MayValue* math_sinh(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = sinhf(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_cosh(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = coshf(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_tanh(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = tanhf(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_asinh(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = asinhf(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_acosh(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = acoshf(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_atanh(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = atanhf(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_nlog(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = logf(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_log2(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = log2f(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_log(struct MayValue** args, int arg_count) {
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = log10f(num->as.floating);
+    return ret;
+}
+
+struct MayValue* math_min(struct MayValue** args, int arg_count) {
+    struct MayValue* num1 = args[0];
+    struct MayValue* num2 = args[1];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = num1->as.floating > num2->as.floating ? num2->as.floating : num1->as.floating;
+    return ret;
+}
+
+struct MayValue* math_max(struct MayValue** args, int arg_count) {
+    struct MayValue* num1 = args[0];
+    struct MayValue* num2 = args[1];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    ret->as.floating = num1->as.floating > num2->as.floating ? num1->as.floating : num2->as.floating;
+    return ret;
+}
+
 void load_math_env(struct Env* env) {
     struct MayValue* pi = malloc(sizeof(struct MayValue));
     pi->type = MAY_FLOAT;
@@ -110,10 +208,15 @@ void load_math_env(struct Env* env) {
     enum MayValueType* one_float = malloc(sizeof(enum MayValueType) * 1);
     one_float[0] = MAY_FLOAT;
 
+    enum MayValueType* two_float = malloc(sizeof(enum MayValueType) * 1);
+    two_float[0] = MAY_FLOAT;
+    two_float[1] = MAY_FLOAT;
+
     register_builtin(env, "abs", math_abs, 1, one_float);
     register_builtin(env, "sqrt", math_sqrt, 1, one_float);
     register_builtin(env, "floor", math_floor, 1, one_float);
     register_builtin(env, "ceil", math_ceil, 1, one_float);
+    register_builtin(env, "round", math_round, 1, one_float);
 
     register_builtin(env, "sin", math_sin, 1, one_float);
     register_builtin(env, "cos", math_cos, 1, one_float);
@@ -121,11 +224,20 @@ void load_math_env(struct Env* env) {
     register_builtin(env, "asin", math_asin, 1, one_float);
     register_builtin(env, "acos", math_acos, 1, one_float);
     register_builtin(env, "atan", math_atan, 1, one_float);
+    register_builtin(env, "sinh", math_sinh, 1, one_float);
+    register_builtin(env, "cosh", math_cosh, 1, one_float);
+    register_builtin(env, "tanh", math_tanh, 1, one_float);
+    register_builtin(env, "asinh", math_asinh, 1, one_float);
+    register_builtin(env, "acosh", math_acosh, 1, one_float);
+    register_builtin(env, "atanh", math_atanh, 1, one_float);
 
-    enum MayValueType* two_float = malloc(sizeof(enum MayValueType) * 1);
-    two_float[0] = MAY_FLOAT;
-    two_float[1] = MAY_FLOAT;
+    register_builtin(env, "nlog", math_nlog, 1, one_float);
+    register_builtin(env, "log2n", math_log2, 1, one_float);
+    register_builtin(env, "log", math_log, 1, one_float);
+
     register_builtin(env, "pow", math_pow, 2, two_float);
+    register_builtin(env, "min", math_min, 2, two_float);
+    register_builtin(env, "max", math_max, 2, two_float);
 }
 
 struct Module* load_math_module() {
