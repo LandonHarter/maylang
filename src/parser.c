@@ -59,12 +59,19 @@ struct Expr* expr_import(char* lib) {
     return e;
 }
 
-struct Expr* expr_if(struct Expr* condition, struct StmtList* thenbody, struct StmtList* elsebody) {
+struct Expr* expr_if(struct Expr* condition, struct StmtList* thenbody) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_IF;
     e->as.ifcond.condition = condition;
     e->as.ifcond.thenbody = thenbody;
-    e->as.ifcond.elsebody = elsebody;
+    return e;
+}
+
+struct Expr* expr_while(struct Expr* condition, struct StmtList* thenbody) {
+    struct Expr* e = malloc(sizeof(struct Expr));
+    e->type = EXPR_WHILE;
+    e->as.whilecond.condition = condition;
+    e->as.whilecond.thenbody = thenbody;
     return e;
 }
 
@@ -120,7 +127,14 @@ void expr_free(struct Expr* expr) {
         case EXPR_IF:
             expr_free(expr->as.ifcond.condition);
             free_stmt_list(expr->as.ifcond.thenbody);
-            free_stmt_list(expr->as.ifcond.elsebody);
+            break;
+        case EXPR_WHILE:
+            expr_free(expr->as.whilecond.condition);
+            free_stmt_list(expr->as.whilecond.thenbody);
+            break;
+        case EXPR_ASSIGN:
+            free(expr->as.assign.name);
+            expr_free(expr->as.assign.value);
             break;
         case EXPR_FUNC:
             break;
@@ -274,6 +288,16 @@ static struct Expr* parse_primary(struct Parser* p) {
         strncpy(name, tok->lexeme, len);
         name[len] = '\0';
 
+        if (check(p, EQUALS)) {
+            advance(p);
+            struct Expr* value = parse_expression(p);
+            struct Expr* e = malloc(sizeof(struct Expr));
+            e->type = EXPR_ASSIGN;
+            e->as.assign.name = name;
+            e->as.assign.value = value;
+            return e;
+        }
+
         if (check(p, LEFT_PAREN)) {
             advance(p);
             struct Expr** args = NULL;
@@ -319,7 +343,7 @@ static struct Expr* parse_primary(struct Parser* p) {
         advance(p);
         return expr_import(lib->literal->as.string.val);
     } if (check(p, IF)) {
-        struct Token* tok = advance(p); 
+        advance(p); 
         if (!check(p, LEFT_PAREN)) {
             fprintf(stderr, "Expected '(' on line %u\n", peek(p)->line);
             exit(-1);
@@ -337,7 +361,26 @@ static struct Expr* parse_primary(struct Parser* p) {
         struct StmtList* thenbody_ptr = malloc(sizeof(struct StmtList));
         *thenbody_ptr = thenbody;
 
-        return expr_if(condition, thenbody_ptr, NULL);
+        return expr_if(condition, thenbody_ptr);
+    } if (check(p, WHILE)) {
+        advance(p);
+        if (!check(p, LEFT_PAREN)) {
+            fprintf(stderr, "Expected '(' on line %u\n", peek(p)->line);
+            exit(-1);
+        }
+
+        struct Expr* condition = parse_expression(p);
+        if (!check(p, LEFT_BRACE)) {
+            fprintf(stderr, "Expected '{' on line %u\n", peek(p)->line);
+            exit(-1);
+        }
+        advance(p);
+
+        struct StmtList thenbody = parse_func(p);
+        advance(p);
+        struct StmtList* thenbody_ptr = malloc(sizeof(struct StmtList));
+        *thenbody_ptr = thenbody;
+        return expr_while(condition, thenbody_ptr);
     }
 
     fprintf(stderr, "Unexpected token '%s' on line %u\n", peek(p)->lexeme, peek(p)->line);
@@ -410,7 +453,7 @@ static struct Stmt* parse_statement(struct Parser* p, struct Env* env) {
         return stmt;
     }
 
-    if (stmt->as.expr->type == EXPR_IF) {
+    if (stmt->as.expr->type == EXPR_IF || stmt->as.expr->type == EXPR_WHILE) {
         return stmt;
     }
 

@@ -14,6 +14,8 @@ enum ExprType {
     EXPR_CALL,
     EXPR_IMPORT,
     EXPR_IF,
+    EXPR_WHILE,
+    EXPR_ASSIGN,
     EXPR_BINARY,
     EXPR_UNARY
 };
@@ -56,8 +58,17 @@ struct Expr {
         struct {
             struct Expr* condition;
             struct StmtList* thenbody;
-            struct StmtList* elsebody;
         } ifcond;
+
+        struct {
+            struct Expr* condition;
+            struct StmtList* thenbody;
+        } whilecond;
+
+        struct {
+            char* name;
+            struct Expr* value;
+        } assign;
 
         struct {
             struct Expr* left;

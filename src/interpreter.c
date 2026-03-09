@@ -173,6 +173,14 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         }
         free_env(call_env);
         return result;
+    } else if (expr->type == EXPR_ASSIGN) {
+        struct MayValue* value = evaluate_expr(expr->as.assign.value, env);
+        struct MayValue* existing = lookup_var(env, expr->as.assign.name);
+        if (!existing) {
+            throw_runtime_error("Undefined variable");
+        }
+        *existing = *value;
+        return existing;
     } else if (expr->type == EXPR_VARIABLE) {
         struct MayValue* value = lookup_var(env, expr->as.string);
         if (!value) {
@@ -187,6 +195,14 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         if (cond->type == MAY_FLOAT && cond->as.floating == 1) {
             struct Env* ifenv = new_env(env);
             evaluate(expr->as.ifcond.thenbody, ifenv);
+        }
+    } else if (expr->type == EXPR_WHILE) {
+        struct Expr* cond_expr = expr->as.whilecond.condition;
+        struct MayValue* cond = evaluate_expr(cond_expr, env);
+        while (cond->type == MAY_FLOAT && cond->as.floating == 1) {
+            struct Env* whileenv = new_env(env);
+            evaluate(expr->as.whilecond.thenbody, whileenv);
+            cond = evaluate_expr(cond_expr, env);
         }
     }
 

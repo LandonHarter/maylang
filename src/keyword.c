@@ -24,5 +24,7 @@ void get_keyword(struct LexerSource* src, struct Token* tok) {
         tok->type = IMPORT;
     } else if (matches_keyword(tok->lexeme, "if")) {
         tok->type = IF;
+    } else if (matches_keyword(tok->lexeme, "while")) {
+        tok->type = WHILE;
     }
 }
