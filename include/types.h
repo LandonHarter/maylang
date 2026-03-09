@@ -52,6 +52,7 @@ int is_digit_or_dec(char c);
 int is_alpha(char c);
 int is_alphanumeric(char c);
 
+char* mv_to_string(struct MayValue* mv);
 void printmv(struct MayValue* val);
 void printmv_col(struct MayValue* val, char* color);
 

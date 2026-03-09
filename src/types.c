@@ -1,5 +1,6 @@
 #include "types.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define COLOR_RED     "\x1b[31m"
@@ -28,6 +29,25 @@ int is_alphanumeric(char c) {
     return is_alpha(c) || is_digit(c);
 }
 
+char* mv_to_string(struct MayValue* mv) {
+    enum MayValueType type = mv->type;
+    if (type == MAY_VAR) type = mv->inferred;
+
+    switch (type) {
+        case MAY_INT:
+            char* intstr = malloc(sizeof(char) * 16);
+            snprintf(intstr, 16, "%i", mv->as.integer);
+            return intstr;
+        case MAY_FLOAT:
+            char* floatstr = malloc(sizeof(char) * 16);
+            snprintf(floatstr, 16, "%g", mv->as.floating);
+            return floatstr;
+        case MAY_STRING:
+            return mv->as.string.val;
+    }
+    return NULL;
+}
+
 void printmv(struct MayValue* val) {
     if (!val) return;
     printmv_col(val, COLOR_RESET);
@@ -54,19 +74,7 @@ void printmv_col(struct MayValue* val, char* color) {
         color_ansi = COLOR_RESET;
     }
 
-    switch (type) {
-        case MAY_INT:
-            printf("%s%i%s\n", color_ansi, val->as.integer, COLOR_RESET);
-            break;
-        case MAY_FLOAT:
-            printf("%s%f%s\n", color_ansi, val->as.floating, COLOR_RESET);
-            break;
-        case MAY_STRING:
-            printf("%s%s%s\n", color_ansi, val->as.string.val, COLOR_RESET);
-            break;
-        case MAY_FUNC:
-            printf("%s%s%s\n", color_ansi, val->as.func.name, COLOR_RESET);
-    }
+    printf("%s%s%s\n", color_ansi, mv_to_string(val), COLOR_RESET);
 }
 
 char* mvtypestr(enum MayValueType type) {

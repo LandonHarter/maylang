@@ -283,17 +283,23 @@ struct MayValue* evaluate_binary(struct Expr* expr, struct Env* env) {
             default: free(result); return NULL;
         }
         return result;
-    } else if (left->type == MAY_STRING && right->type == MAY_STRING && expr->as.binary.op == '+') {
-        result->type = MAY_STRING;
-        int left_len = strlen(left->as.string.val);
-        int right_len = strlen(right->as.string.val);
-        char* resstr = malloc(left_len + right_len + 1);
-        memcpy(resstr, left->as.string.val, left_len);
-        memcpy(resstr + left_len, right->as.string.val, right_len);
-        resstr[left_len + right_len] = '\0';
-        result->as.string.val = resstr;
-        result->as.string.len = left_len + right_len;
-        return result;
+    } else if (left->type == MAY_STRING || right->type == MAY_STRING) {
+        if (expr->as.binary.op == '+') {
+            result->type = MAY_STRING;
+            int left_len = strlen(mv_to_string(left));
+            int right_len = strlen(mv_to_string(right));
+            char* resstr = malloc(left_len + right_len + 1);
+            memcpy(resstr, mv_to_string(left), left_len);
+            memcpy(resstr + left_len, mv_to_string(right), right_len);
+            resstr[left_len + right_len] = '\0';
+            result->as.string.val = resstr;
+            result->as.string.len = left_len + right_len;
+            return result;
+        } else if (expr->as.binary.op == 'e' || expr->as.binary.op == 'n') {
+            result->type = MAY_FLOAT;
+            result->as.floating = strcmp(left->as.string.val, right->as.string.val) == 0 ? 1 : 0;
+            return result;
+        }
     }
 
     fprintf(stderr, "Cannot %c types %s and %s\n", expr->as.binary.op, mvtypestr(left->type), mvtypestr(right->type));
