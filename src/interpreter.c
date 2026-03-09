@@ -69,6 +69,12 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
                 }
                 value->type = MAY_FLOAT;
                 value->inferred = MAY_FLOAT;
+            } else if (decl == STRING_TYPE) {
+                if (value->type != MAY_STRING) {
+                    throw_runtime_error("Cannot assign non-string to string variable");
+                }
+                value->type = MAY_STRING;
+                value->inferred = MAY_STRING;
             }
         }
 
@@ -153,6 +159,12 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
                 }
                 param_val->type = MAY_FLOAT;
                 param_val->inferred = MAY_FLOAT;
+            } else if (ptype == STRING_TYPE) {
+                if (param_val->type != MAY_STRING) {
+                    throw_runtime_error("Cannot pass non-string to string parameter");
+                }
+                param_val->type = MAY_STRING;
+                param_val->inferred = MAY_STRING;
             } else {
                 param_val->inferred = param_val->type;
                 param_val->type = MAY_VAR;

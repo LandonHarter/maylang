@@ -26,6 +26,7 @@ enum TokenType {
     VAR,
     INT,
     FLOAT,
+    STRING_TYPE,
 
     COMMA,
     SEMICOLON,

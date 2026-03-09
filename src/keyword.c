@@ -26,5 +26,7 @@ void get_keyword(struct LexerSource* src, struct Token* tok) {
         tok->type = IF;
     } else if (matches_keyword(tok->lexeme, "while")) {
         tok->type = WHILE;
+    } else if (matches_keyword(tok->lexeme, "string")) {
+        tok->type = STRING_TYPE;
     }
 }

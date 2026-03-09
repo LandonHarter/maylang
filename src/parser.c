@@ -212,7 +212,7 @@ static struct Expr* parse_primary(struct Parser* p) {
         }
         advance(p);
         return inner;
-    } if (check(p, VAR) || check(p, INT) || check(p, FLOAT)) {
+    } if (check(p, VAR) || check(p, INT) || check(p, FLOAT) || check(p, STRING_TYPE)) {
         struct Token* type_tok = advance(p);
         int decl_type = type_tok->type;
         struct Token* name = advance(p);
@@ -239,7 +239,7 @@ static struct Expr* parse_primary(struct Parser* p) {
 
             if (!check(p, RIGHT_PAREN)) {
                 do {
-                    if (!check(p, VAR) && !check(p, INT) && !check(p, FLOAT)) {
+                    if (!check(p, VAR) && !check(p, INT) && !check(p, FLOAT) && !check(p, STRING_TYPE)) {
                         printf("Expected parameter type on line %u\n", peek(p)->line);
                         exit(-1);
                     }
