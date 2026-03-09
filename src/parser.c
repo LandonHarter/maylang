@@ -52,6 +52,13 @@ struct Expr* expr_return(struct Expr* val) {
     return e;
 }
 
+struct Expr* expr_import(char* lib) {
+    struct Expr* e = malloc(sizeof(struct Expr));
+    e->type = EXPR_IMPORT;
+    e->as.import.lib = lib;
+    return e;
+}
+
 struct Expr* expr_binary(struct Expr* left, struct Expr* right, char op) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_BINARY;
@@ -84,6 +91,8 @@ void expr_free(struct Expr* expr) {
         case EXPR_STRING:
             break;
         case EXPR_VARIABLE:
+            break;
+        case EXPR_IMPORT:
             break;
         case EXPR_VARIABLEDECL:
             expr_free(expr->as.vardecl.initializer);
@@ -284,6 +293,16 @@ static struct Expr* parse_primary(struct Parser* p) {
     } if (check(p, RETURN)) {
         advance(p);
         return expr_return(parse_expression(p));
+    } if (check(p, IMPORT)) {
+        advance(p);
+        if (!check(p, STRING)) {
+            fprintf(stderr, "Expected string on line %u\n", peek(p)->line);
+            exit(-1);
+        }
+
+        struct Token* lib = peek(p);
+        advance(p);
+        return expr_import(lib->literal->as.string.val);
     }
 
     fprintf(stderr, "Unexpected token '%s' on line %u\n", peek(p)->lexeme, peek(p)->line);

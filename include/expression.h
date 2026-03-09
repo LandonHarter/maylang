@@ -12,6 +12,7 @@ enum ExprType {
     EXPR_FUNCDECL,
     EXPR_FUNCRETURN,
     EXPR_CALL,
+    EXPR_IMPORT,
     EXPR_BINARY,
     EXPR_UNARY
 };
@@ -46,6 +47,10 @@ struct Expr {
             struct Expr** args;
             int arg_count;
         } call;
+
+        struct {
+            char* lib;
+        } import;
 
         struct {
             struct Expr* left;

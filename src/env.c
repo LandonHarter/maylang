@@ -1,15 +1,27 @@
 #include "env.h"
 #include "types.h"
+#include "module.h"
+#include "lib/math.h"
 #include <stdlib.h>
 #include <string.h>
 
 struct Env* new_env(struct Env* parent) {
     struct Env* env = malloc(sizeof(struct Env));
+
     env->vars = malloc(sizeof(struct VarList));
     env->vars->vars = NULL;
     env->vars->count = 0;
     env->vars->capacity = 0;
+
+    env->modules = malloc(sizeof(struct ModuleList));
+    env->modules->modules = NULL;
+    env->modules->count = 0;
+    env->modules->capacity = 0;
+
     env->parent = parent;
+
+    register_module(env->modules, load_math_module());
+
     return env;
 }
 
@@ -30,8 +42,12 @@ void free_var_list(struct VarList* list) {
 }
 
 void free_env(struct Env* env) {
-    if (env->vars)
+    if (env->vars) {
         free_var_list(env->vars);
+    }
+    if (env->modules) {
+        free_module_list(env->modules);
+    }
     free(env);
 }
 

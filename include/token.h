@@ -14,13 +14,13 @@ enum TokenType {
 
     IDENTIFIER,
     RETURN,
+    IMPORT,
     STRING,
     NUMBER,
 
     AND,
     OR,
 
-    VOID,
     VAR,
     INT,
     FLOAT,

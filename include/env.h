@@ -15,6 +15,7 @@ struct VarList {
 
 struct Env {
     struct VarList* vars;
+    struct ModuleList* modules;
     struct Env* parent;
 };
 

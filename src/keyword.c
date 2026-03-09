@@ -12,9 +12,7 @@ int matches_keyword(char* identifier, char* keyword) {
 }
 
 void get_keyword(struct LexerSource* src, struct Token* tok) {
-    if (matches_keyword(tok->lexeme, "void")) {
-        tok->type = VOID;
-    } else if (matches_keyword(tok->lexeme, "var")) {
+    if (matches_keyword(tok->lexeme, "var")) {
         tok->type = VAR;
     } else if (matches_keyword(tok->lexeme, "float")) {
         tok->type = FLOAT;
@@ -22,5 +20,7 @@ void get_keyword(struct LexerSource* src, struct Token* tok) {
         tok->type = INT;
     } else if (matches_keyword(tok->lexeme, "return")) {
         tok->type = RETURN;
+    } else if (matches_keyword(tok->lexeme, "import")) {
+        tok->type = IMPORT;
     }
 }

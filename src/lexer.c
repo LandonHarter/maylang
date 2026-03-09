@@ -203,7 +203,11 @@ void string_val(struct LexerSource* src, struct MayValue* str) {
         src->idx++;
         str->as.string.len++;
     }
-    str->as.string.val = src->src + start;
+
+    char* val = malloc(str->as.string.len + 1);
+    strncpy(val, src->src + start, str->as.string.len);
+    val[str->as.string.len] = '\0';
+    str->as.string.val = val;
 }
 
 void number_val(struct LexerSource* src, struct MayValue* num, struct Token* tok) {

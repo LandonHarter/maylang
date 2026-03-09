@@ -5,6 +5,7 @@
 #include "error.h"
 #include "statement.h"
 #include "env.h"
+#include "module.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -170,6 +171,8 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
             throw_runtime_error("Undefined variable");
         }
         return value;
+    } else if (expr->type == EXPR_IMPORT) {
+        load_module(env, expr->as.import.lib);
     }
 
     return NULL;
