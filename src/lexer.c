@@ -54,16 +54,60 @@ struct TokenList tokenize(struct Source* filesource) {
                 append_basic_token(&list, &tok, RIGHT_BRACE, &c);
                 break;
             case '+':
-                append_basic_token(&list, &tok, PLUS, &c);
+                if (follows(&source, "=")) {
+                    tok.type = PLUS_EQUALS;
+                    tok.lexeme[0] = '+';
+                    tok.lexeme[1] = '=';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                } else if (follows(&source, "+")) {
+                    tok.type = PLUS_PLUS;
+                    tok.lexeme[0] = '+';
+                    tok.lexeme[1] = '+';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                } else {
+                    append_basic_token(&list, &tok, PLUS, &c);
+                }
                 break;
             case '-':
-                append_basic_token(&list, &tok, MINUS, &c);
+                if (follows(&source, "=")) {
+                    tok.type = MINUS_EQUALS;
+                    tok.lexeme[0] = '-';
+                    tok.lexeme[1] = '=';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                } else if (follows(&source, "-")) {
+                    tok.type = MINUS_MINUS;
+                    tok.lexeme[0] = '-';
+                    tok.lexeme[1] = '-';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                } else {
+                    append_basic_token(&list, &tok, MINUS, &c);
+                }
                 break;
             case '*':
-                append_basic_token(&list, &tok, MULTIPLY, &c);
+                if (follows(&source, "=")) {
+                    tok.type = MULTIPLY_EQUALS;
+                    tok.lexeme[0] = '*';
+                    tok.lexeme[1] = '=';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                } else {
+                    append_basic_token(&list, &tok, MULTIPLY, &c);
+                }
                 break;
             case '/':
-                append_basic_token(&list, &tok, DIVIDE, &c);
+                if (follows(&source, "=")) {
+                    tok.type = DIVIDE_EQUALS;
+                    tok.lexeme[0] = '/';
+                    tok.lexeme[1] = '=';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
+                } else {
+                    append_basic_token(&list, &tok, DIVIDE, &c);
+                }
                 break;
             case '%':
                 append_basic_token(&list, &tok, MODULO, &c);

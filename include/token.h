@@ -44,6 +44,13 @@ enum TokenType {
     BANG,
     QUESTION,
 
+    PLUS_EQUALS,
+    MINUS_EQUALS,
+    MULTIPLY_EQUALS,
+    DIVIDE_EQUALS,
+    PLUS_PLUS,
+    MINUS_MINUS,
+
     END_FILE
 };
 

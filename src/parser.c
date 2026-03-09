@@ -298,6 +298,36 @@ static struct Expr* parse_primary(struct Parser* p) {
             return e;
         }
 
+        if (check(p, PLUS_EQUALS) || check(p, MINUS_EQUALS) || check(p, MULTIPLY_EQUALS) || check(p, DIVIDE_EQUALS)) {
+            char op;
+            if (check(p, PLUS_EQUALS)) op = '+';
+            else if (check(p, MINUS_EQUALS)) op = '-';
+            else if (check(p, MULTIPLY_EQUALS)) op = '*';
+            else op = '/';
+            advance(p);
+            struct Expr* rhs = parse_expression(p);
+            struct Expr* var = expr_variable(strdup(name));
+            struct Expr* bin = expr_binary(var, rhs, op);
+            struct Expr* e = malloc(sizeof(struct Expr));
+            e->type = EXPR_ASSIGN;
+            e->as.assign.name = name;
+            e->as.assign.value = bin;
+            return e;
+        }
+
+        if (check(p, PLUS_PLUS) || check(p, MINUS_MINUS)) {
+            char op = check(p, PLUS_PLUS) ? '+' : '-';
+            advance(p);
+            struct Expr* var = expr_variable(strdup(name));
+            struct Expr* one = expr_number(1);
+            struct Expr* bin = expr_binary(var, one, op);
+            struct Expr* e = malloc(sizeof(struct Expr));
+            e->type = EXPR_ASSIGN;
+            e->as.assign.name = name;
+            e->as.assign.value = bin;
+            return e;
+        }
+
         if (check(p, LEFT_PAREN)) {
             advance(p);
             struct Expr** args = NULL;
