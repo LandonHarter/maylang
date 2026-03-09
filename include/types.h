@@ -53,3 +53,4 @@ int is_alpha(char c);
 int is_alphanumeric(char c);
 
 void printmv(struct MayValue* val);
+void printmv_col(struct MayValue* val, char* color);

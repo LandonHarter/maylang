@@ -1,2 +1,4 @@
 import "io";
+
 print("Hello world!");
+colprint("Hello world in red!", "red");
