@@ -435,7 +435,42 @@ static struct Expr* parse_additive(struct Parser* p) {
 }
 
 static struct Expr* parse_expression(struct Parser* p) {
-    return parse_additive(p);
+    struct Expr* left = parse_additive(p);
+
+    while (check(p, PIPE)) {
+          advance(p);
+          struct Expr* right = parse_primary(p);
+
+          struct Expr* e = malloc(sizeof(struct Expr));
+          e->type = EXPR_CALL;
+
+          if (right->type == EXPR_CALL) {
+              int new_count = right->as.call.arg_count + 1;
+              struct Expr** new_args = malloc(new_count * sizeof(struct Expr*));
+              new_args[0] = left;
+              for (int i = 0; i < right->as.call.arg_count; i++) {
+                  new_args[i + 1] = right->as.call.args[i];
+              }
+              free(right->as.call.args);
+              e->as.call.name = right->as.call.name;
+              e->as.call.args = new_args;
+              e->as.call.arg_count = new_count;
+              free(right);
+          } else if (right->type == EXPR_VARIABLE) {
+              e->as.call.name = right->as.string;
+              e->as.call.args = malloc(sizeof(struct Expr*));
+              e->as.call.args[0] = left;
+              e->as.call.arg_count = 1;
+              free(right);
+          } else {
+              fprintf(stderr, "Right side of | must be a function\n");
+              exit(-1);
+          }
+
+          left = e;
+      }
+
+      return left;
 }
 
 static struct Stmt* parse_statement(struct Parser* p, struct Env* env) {

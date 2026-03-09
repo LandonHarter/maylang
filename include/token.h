@@ -29,6 +29,7 @@ enum TokenType {
     STRING_TYPE,
 
     COMMA,
+    PIPE,
     SEMICOLON,
 
     EQUALS,
