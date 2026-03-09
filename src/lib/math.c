@@ -6,10 +6,17 @@
 #include <stdlib.h>
 
 struct MayValue* math_abs(struct MayValue** args, int arg_count) {
-    if (arg_count != 1) {
-        throw_runtime_error("abs expects 1 argument");
+    struct MayValue* num = args[0];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+
+    ret->type = MAY_FLOAT;
+    if (num->as.floating < 0) {
+        ret->as.floating = -num->as.floating;
+    } else {
+        ret->as.floating = num->as.floating;
     }
-    return NULL;
+
+    return ret;
 }
 
 void load_math_env(struct Env* env) {

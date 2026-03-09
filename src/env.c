@@ -2,6 +2,7 @@
 #include "types.h"
 #include "module.h"
 #include "lib/math.h"
+#include "lib/io.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -21,6 +22,7 @@ struct Env* new_env(struct Env* parent) {
     env->parent = parent;
 
     register_module(env->modules, load_math_module());
+    register_module(env->modules, load_io_module());
 
     return env;
 }

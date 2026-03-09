@@ -118,7 +118,7 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
                 args = malloc(argc * sizeof(struct MayValue*));
                 for (int i = 0; i < argc; i++) {
                     args[i] = evaluate_expr(expr->as.call.args[i], env);
-                    if (args[i]->type != func->as.builtin.arg_types[i]) {
+                    if (args[i]->type != func->as.builtin.arg_types[i] && func->as.builtin.arg_types[i] != MAY_VAR) {
                         throw_runtime_error("Invalid argument type");
                     }
                 }
@@ -196,7 +196,6 @@ struct MayValue* evaluate_stmt(struct Stmt* stmt, struct Env* env) {
 void evaluate(struct StmtList* list, struct Env* env) {
     for (int i = 0; i < list->count; i++) {
         struct MayValue* ret = evaluate_stmt(list->stmts[i], env);
-        printmv(ret);
     }
 }
 

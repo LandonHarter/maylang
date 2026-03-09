@@ -21,15 +21,18 @@ int is_alphanumeric(char c) {
 
 void printmv(struct MayValue* val) {
     if (!val) return;
-    switch (val->type) {
+
+    enum MayValueType type = val->type;
+    if (type == MAY_VAR) type = val->inferred;
+    switch (type) {
         case MAY_INT:
-            printf("%i", val->as.integer);
+            printf("%i\n", val->as.integer);
             break;
         case MAY_FLOAT:
-            printf("%f", val->as.floating);
+            printf("%f\n", val->as.floating);
             break;
         case MAY_STRING:
-            printf("%s", val->as.string.val);
+            printf("%s\n", val->as.string.val);
             break;
     }
 }
