@@ -110,10 +110,18 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         if (func->type == MAY_BUILTIN_FUNC) {
             struct MayValue** args = NULL;
             int argc = expr->as.call.arg_count;
+            if (func->as.builtin.num_args != argc) {
+                throw_runtime_error("Wrong number of arguments");
+            }
+
             if (argc > 0) {
                 args = malloc(argc * sizeof(struct MayValue*));
-                for (int i = 0; i < argc; i++)
+                for (int i = 0; i < argc; i++) {
                     args[i] = evaluate_expr(expr->as.call.args[i], env);
+                    if (args[i]->type != func->as.builtin.arg_types[i]) {
+                        throw_runtime_error("Invalid argument type");
+                    }
+                }
             }
             struct MayValue* ret = func->as.builtin.cfunc(args, argc);
             free(args);

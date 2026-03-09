@@ -27,6 +27,8 @@ struct MayBuiltinFunc {
     char* name;
     int return_type;
     MayNativeFn cfunc;
+    int num_args;
+    enum MayValueType* arg_types;
 };
 
 struct MayValue {

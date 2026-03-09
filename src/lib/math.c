@@ -13,7 +13,9 @@ struct MayValue* math_abs(struct MayValue** args, int arg_count) {
 }
 
 void load_math_env(struct Env* env) {
-    register_builtin(env, "abs", math_abs);
+    enum MayValueType* arg_types = malloc(sizeof(enum MayValueType) * 1);
+    arg_types[0] = MAY_FLOAT;
+    register_builtin(env, "abs", math_abs, 1, arg_types);
 }
 
 struct Module* load_math_module() {

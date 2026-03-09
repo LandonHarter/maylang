@@ -59,11 +59,13 @@ void append_var(struct Env* env, struct Var* var) {
     env->vars->vars[env->vars->count++] = var;
 }
 
-void register_builtin(struct Env* env, const char* name, MayNativeFn fn) {
+void register_builtin(struct Env* env, const char* name, MayNativeFn fn, int num_args, enum MayValueType* arg_types) {
     struct MayValue* value = malloc(sizeof(struct MayValue));
     value->type = MAY_BUILTIN_FUNC;
     value->as.builtin.name = strdup(name);
     value->as.builtin.cfunc = fn;
+    value->as.builtin.num_args = num_args;
+    value->as.builtin.arg_types = arg_types;
 
     struct Var* var = malloc(sizeof(struct Var));
     var->name = strdup(name);
