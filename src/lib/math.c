@@ -5,6 +5,7 @@
 #include "module.h"
 #include <math.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 struct MayValue* math_abs(struct MayValue** args, int arg_count) {
     struct MayValue* num = args[0];
@@ -199,6 +200,22 @@ struct MayValue* math_max(struct MayValue** args, int arg_count) {
     return ret;
 }
 
+struct MayValue* math_random(struct MayValue** args, int arg_count) {
+    struct MayValue* min = args[0];
+    struct MayValue* max = args[1];
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_FLOAT;
+    
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    srand(tv.tv_usec ^ tv.tv_sec);
+
+    float scale = (float)rand() / (float)RAND_MAX;
+    ret->as.floating = min->as.floating + (max->as.floating - min->as.floating) * scale;
+
+    return ret;
+}
+
 void load_math_env(struct Env* env) {
     struct MayValue* pi = malloc(sizeof(struct MayValue));
     pi->type = MAY_FLOAT;
@@ -238,6 +255,7 @@ void load_math_env(struct Env* env) {
     register_builtin(env, "pow", math_pow, 2, two_float);
     register_builtin(env, "min", math_min, 2, two_float);
     register_builtin(env, "max", math_max, 2, two_float);
+    register_builtin(env, "random", math_random, 2, two_float);
 }
 
 struct Module* load_math_module() {
