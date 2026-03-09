@@ -11,6 +11,7 @@ enum TokenType {
     MINUS,
     MULTIPLY,
     DIVIDE,
+    MODULO,
 
     IDENTIFIER,
     RETURN,

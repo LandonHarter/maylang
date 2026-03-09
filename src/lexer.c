@@ -65,6 +65,9 @@ struct TokenList tokenize(struct Source* filesource) {
             case '/':
                 append_basic_token(&list, &tok, DIVIDE, &c);
                 break;
+            case '%':
+                append_basic_token(&list, &tok, MODULO, &c);
+                break;
             case '>':
                 if (follows(&source, "=")) {
                     tok.type = GTE;

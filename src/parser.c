@@ -403,7 +403,7 @@ static struct Expr* parse_unary(struct Parser* p) {
 static struct Expr* parse_multiplicative(struct Parser* p) {
     struct Expr* left = parse_unary(p);
 
-    while (check(p, MULTIPLY) || check(p, DIVIDE)) {
+    while (check(p, MULTIPLY) || check(p, DIVIDE) || check(p, MODULO)) {
         char op = advance(p)->lexeme[0];
         struct Expr* right = parse_unary(p);
         left = expr_binary(left, right, op);

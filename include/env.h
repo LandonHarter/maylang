@@ -24,3 +24,4 @@ struct Env* new_env(struct Env* parent);
 void free_env(struct Env* env);
 void append_var(struct Env* env, struct Var* var);
 void register_builtin(struct Env* env, const char* name, MayNativeFn fn, int num_args, enum MayValueType* arg_types);
+void register_builtin_var(struct Env* env, const char* name, struct MayValue* val);

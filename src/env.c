@@ -78,3 +78,10 @@ void register_builtin(struct Env* env, const char* name, MayNativeFn fn, int num
     var->value = value;
     append_var(env, var);
 }
+
+void register_builtin_var(struct Env* env, const char* name, struct MayValue* val) {
+    struct Var* var = malloc(sizeof(struct Var));
+    var->name = strdup(name);
+    var->value = val;
+    append_var(env, var);
+}

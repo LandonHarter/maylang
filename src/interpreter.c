@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 static int is_numeric(struct MayValue* val) {
     enum MayValueType t = val->type == MAY_VAR ? val->inferred : val->type;
@@ -272,6 +273,7 @@ struct MayValue* evaluate_binary(struct Expr* expr, struct Env* env) {
             case '-': result->as.floating = leftf - rightf; break;
             case '*': result->as.floating = leftf * rightf; break;
             case '/': result->as.floating = leftf / rightf; break;
+            case '%': result->as.floating = (int)floorf(leftf) % (int)floorf(rightf); break;
             case 'e': result->as.floating = leftf == rightf ? 1 : 0; break;
             case 'n': result->as.floating = leftf != rightf ? 1 : 0; break;
             case 'g': result->as.floating = leftf >= rightf ? 1 : 0; break;
