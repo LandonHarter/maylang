@@ -32,6 +32,10 @@ enum TokenType {
     EQUALS,
     EQUALS_EQUALS,
     NOT_EQUALS,
+    GT,
+    GTE,
+    LT,
+    LTE,
 
     BANG,
     QUESTION,

@@ -372,10 +372,14 @@ static struct Expr* parse_multiplicative(struct Parser* p) {
 static struct Expr* parse_additive(struct Parser* p) {
     struct Expr* left = parse_multiplicative(p);
 
-    while (check(p, PLUS) || check(p, MINUS) || check(p, EQUALS_EQUALS) || check(p, NOT_EQUALS)) {
+    while (check(p, PLUS) || check(p, MINUS) || check(p, EQUALS_EQUALS) || check(p, NOT_EQUALS) || check(p, GTE)|| check(p, GT)|| check(p, LTE)|| check(p, LT)) {
         char op;
         if (check(p, EQUALS_EQUALS)) op = 'e';
         else if (check(p, NOT_EQUALS)) op = 'n';
+        else if (check(p, GTE)) op = 'g';
+        else if (check(p, GT)) op = 'm';
+        else if (check(p, LTE)) op = 'l';
+        else if (check(p, LT)) op = 'u';
         else op = peek(p)->lexeme[0];
         advance(p);
         struct Expr* right = parse_multiplicative(p);

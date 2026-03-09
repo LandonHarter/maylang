@@ -249,6 +249,10 @@ struct MayValue* evaluate_binary(struct Expr* expr, struct Env* env) {
         case '/': result->as.floating = leftf / rightf; break;
         case 'e': result->as.floating = leftf == rightf ? 1 : 0; break;
         case 'n': result->as.floating = leftf != rightf ? 1 : 0; break;
+        case 'g': result->as.floating = leftf >= rightf ? 1 : 0; break;
+        case 'm': result->as.floating = leftf > rightf ? 1 : 0; break;
+        case 'l': result->as.floating = leftf <= rightf ? 1 : 0; break;
+        case 'u': result->as.floating = leftf < rightf ? 1 : 0; break;
         default: free(result); return NULL;
     }
     return result;

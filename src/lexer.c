@@ -65,6 +65,28 @@ struct TokenList tokenize(struct Source* filesource) {
             case '/':
                 append_basic_token(&list, &tok, DIVIDE, &c);
                 break;
+            case '>':
+                if (follows(&source, "=")) {
+                    tok.type = GTE;
+                    tok.lexeme[0] = '>';
+                    tok.lexeme[0] = '=';
+                    tok.lexeme[0] = '\0';
+                    append_token(&list, tok);
+                } else {
+                    append_basic_token(&list, &tok, GT, &c);
+                }
+                break;
+            case '<':
+                if (follows(&source, "=")) {
+                    tok.type = LTE;
+                    tok.lexeme[0] = '<';
+                    tok.lexeme[0] = '=';
+                    tok.lexeme[0] = '\0';
+                    append_token(&list, tok);
+                } else {
+                    append_basic_token(&list, &tok, LT, &c);
+                }
+                break;
             case '!':
                 if (follows(&source, "=")) {
                     tok.type = NOT_EQUALS;
