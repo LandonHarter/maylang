@@ -30,6 +30,8 @@ int is_alphanumeric(char c) {
 }
 
 char* mv_to_string(struct MayValue* mv) {
+    if (mv == NULL) return NULL;
+
     enum MayValueType type = mv->type;
     if (type == MAY_VAR) type = mv->inferred;
 
