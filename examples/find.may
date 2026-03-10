@@ -1,0 +1,29 @@
+import "io";
+import "string";
+import "math";
+
+int find(string str, string pattern) {
+    int count = 0;
+    int limit = (str | length) - (pattern | length);
+    int plen = pattern | length;
+    while (count <= limit) {
+       int subcount = 0;
+       int isfound = 1;
+       while (subcount < plen) {
+            if (char(str, count + subcount) != char(pattern, subcount)) {
+                isfound = 0;
+            }
+            subcount++;
+       }
+
+       if (isfound) {
+            return count;
+       }
+       count++;
+    }
+
+    return -1;
+}
+
+string message = "Dusty May is the greatest basketball coach of all time.";
+find(message, "coach") | print;
