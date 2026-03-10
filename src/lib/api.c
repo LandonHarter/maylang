@@ -71,14 +71,69 @@ struct MayValue* cjson_to_mayvalue(cJSON *item) {
     return val;
 }
 
+cJSON* mayvalue_to_cjson(struct MayValue* val) {
+    if (!val) return cJSON_CreateNull();
+    if (val->type == MAY_STRING) return cJSON_CreateString(val->as.string.val);
+    if (val->type == MAY_INT) return cJSON_CreateNumber(val->as.integer);
+    if (val->type == MAY_FLOAT) return cJSON_CreateNumber(val->as.floating);
+    if (val->type == MAY_ARRAY) {
+        cJSON* arr = cJSON_CreateArray();
+        for (int i = 0; i < val->as.array.length; i++)
+            cJSON_AddItemToArray(arr, mayvalue_to_cjson(val->as.array.elements[i]));
+        return arr;
+    }
+    if (val->type == MAY_OBJECT) {
+        cJSON* obj = cJSON_CreateObject();
+        for (int i = 0; i < val->as.object.num_values; i++)
+            cJSON_AddItemToObject(obj, val->as.object.names[i], mayvalue_to_cjson(val->as.object.values[i]));
+        return obj;
+    }
+    return cJSON_CreateNull();
+}
+
 struct MayValue* api_curl(struct MayValue** args, int arg_count) {
     char* url = args[0]->as.string.val;
     struct MayValue* params = args[1];
 
     CURL *curl = curl_easy_init();
     struct Buffer response_buffer = {NULL, 0};
+    struct curl_slist *header_list = NULL;
     if (curl) {
         curl_easy_setopt(curl, CURLOPT_URL, url);
+
+        struct MayValue* method_val = get_field(params, "method");
+        if (method_val && method_val->type == MAY_STRING) {
+            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method_val->as.string.val);
+        }
+
+        struct MayValue* headers_val = get_field(params, "headers");
+        if (headers_val && headers_val->type == MAY_OBJECT) {
+            for (int i = 0; i < headers_val->as.object.num_values; i++) {
+                char* name = headers_val->as.object.names[i];
+                struct MayValue* val = headers_val->as.object.values[i];
+                if (val->type == MAY_STRING) {
+                    int len = strlen(name) + 2 + val->as.string.len + 1;
+                    char* header = malloc(len);
+                    snprintf(header, len, "%s: %s", name, val->as.string.val);
+                    header_list = curl_slist_append(header_list, header);
+                    free(header);
+                }
+            }
+            if (header_list) {
+                curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
+            }
+        }
+
+        struct MayValue* body_val = get_field(params, "body");
+        if (body_val && (body_val->type == MAY_OBJECT || body_val->type == MAY_ARRAY)) {
+            cJSON* body_json = mayvalue_to_cjson(body_val);
+            char* body_str = cJSON_PrintUnformatted(body_json);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_str);
+            header_list = curl_slist_append(header_list, "Content-Type: application/json");
+            cJSON_Delete(body_json);
+        } else if (body_val && body_val->type == MAY_STRING) {
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_val->as.string.val);
+        }
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
@@ -99,6 +154,7 @@ struct MayValue* api_curl(struct MayValue** args, int arg_count) {
             ret->as.string.val = response_buffer.data;
             ret->as.string.len = response_buffer.size;
         }
+        if (header_list) curl_slist_free_all(header_list);
         curl_easy_cleanup(curl);
         return ret;
     }

@@ -30,23 +30,26 @@ struct MayValue* dotenv_envvar(struct MayValue** args, int arg_count) {
 
     char* token = strtok(fbuf, "\n");
     while (token != NULL) {
-        char* name = malloc(sizeof(char));
-        char* value = malloc(sizeof(char));
         int line_len = strlen(token);
+        char* name = malloc(line_len + 1);
+        char* value = malloc(line_len + 1);
 
         int found_equals = 0;
+        int name_idx = 0;
         int value_idx = 0;
         for (int i = 0; i < line_len; i++) {
-            if (token[i] == '=') {
-                found_equals = i;
+            if (!found_equals && token[i] == '=') {
+                found_equals = 1;
                 continue;
-            } else if (found_equals == 0) {
-                name[i] = token[i];
+            } else if (!found_equals) {
+                name[name_idx] = token[i];
+                name_idx++;
             } else if (token[i] != '"') {
                 value[value_idx] = token[i];
                 value_idx++;
             }
         }
+        name[name_idx] = '\0';
         value[value_idx] = '\0';
 
         if (strcmp(name, args[0]->as.string.val) == 0) {

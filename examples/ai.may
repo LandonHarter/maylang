@@ -1,0 +1,28 @@
+import "io";
+import "api";
+import "dotenv";
+
+string prompt = input("What would you like to ask AI: ");
+
+string ai_url = envvar("AI_URL");
+string ai_model = envvar("AI_MODEL");
+string api_key = envvar("AI_API_KEY");
+curl(ai_url, {
+    method: "POST",
+    headers: {
+        Authorization: "Bearer " + api_key
+    },
+    body: {
+       model: ai_model,
+       messages: [
+            {
+                role: "system",
+                content: "You are a super friendly AI."
+            },
+            {
+                role: "user",
+                content: prompt
+            }
+       ]
+    }
+}) | print;

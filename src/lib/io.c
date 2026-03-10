@@ -18,15 +18,17 @@ struct MayValue* io_print_color(struct MayValue** args, int arg_count) {
 }
 
 struct MayValue* io_input(struct MayValue** args, int arg_count) {
-    char input;
+    char* inputstr = NULL;
+    size_t inputsz = 0;
     printf("%s", args[0]->as.string.val);
-    scanf("%[^\n]s", &input);
-    char* inputstr = strdup(&input);
+    getline(&inputstr, &inputsz, stdin);
+    size_t len = strlen(inputstr);
+    if (len > 0 && inputstr[len - 1] == '\n') inputstr[--len] = '\0';
 
     struct MayValue* retstr = malloc(sizeof(struct MayValue));
     retstr->type = MAY_STRING;
     retstr->as.string.val = inputstr;
-    retstr->as.string.len = strlen(inputstr);
+    retstr->as.string.len = len;
     return retstr;
 }
 
