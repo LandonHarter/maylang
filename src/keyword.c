@@ -3,6 +3,9 @@
 #include <string.h>
 
 int matches_keyword(char* identifier, char* keyword) {
+    if (strlen(identifier) != strlen(keyword)) {
+        return 0;
+    }
     for (int i = 0; i < strlen(identifier); i++) {
         if (identifier[i] != keyword[i]) {
             return 0;

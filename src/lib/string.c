@@ -55,8 +55,9 @@ struct MayValue* string_capitalize(struct MayValue** args, int arg_count) {
 struct MayValue* string_get_char(struct MayValue** args, int arg_count) {
     struct MayValue* ret = malloc(sizeof(struct MayValue));
     ret->type = MAY_STRING;
-    ret->as.string.val = malloc(sizeof(char));
+    ret->as.string.val = malloc(2);
     ret->as.string.val[0] = args[0]->as.string.val[(int)args[1]->as.floating];
+    ret->as.string.val[1] = '\0';
     ret->as.string.len = 1;
     return ret;
 }
@@ -137,6 +138,26 @@ struct MayValue* string_alphanumeric(struct MayValue** args, int arg_count) {
     return ret;
 }
 
+struct MayValue* string_substring(struct MayValue** args, int arg_count) {
+    char* str = args[0]->as.string.val;
+    int start = (int) args[1]->as.floating;
+    int end = (int) args[2]->as.floating;
+    if (end < 0) {
+        end = strlen(str) + end + 1;
+    }
+
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_STRING;
+
+    char* returnstr = malloc(end - start);
+    for (int i = 0; i < end - start; i++) {
+        returnstr[i] = str[i + start];
+    }
+    ret->as.string.val = returnstr;
+
+    return ret;
+}
+
 void load_string_env(struct Env* env) {
     enum MayValueType* one_string = malloc(sizeof(enum MayValueType) * 1);
     one_string[0] = MAY_STRING;
@@ -150,10 +171,17 @@ void load_string_env(struct Env* env) {
 
     enum MayValueType* string_int = malloc(sizeof(enum MayValueType) * 2);
     one_string[0] = MAY_STRING;
-    one_string[1] = MAY_INT;
+    one_string[1] = MAY_FLOAT;
 
     register_builtin(env, "char", string_get_char, 2, string_int);
-    
+
+    enum MayValueType* string_int_int = malloc(sizeof(enum MayValueType) * 2);
+    string_int_int[0] = MAY_STRING;
+    string_int_int[1] = MAY_FLOAT;
+    string_int_int[2] = MAY_FLOAT;
+
+    register_builtin(env, "substring", string_substring, 3, string_int_int);
+
     enum MayValueType* string_string_string = malloc(sizeof(enum MayValueType));
     string_string_string[0] = MAY_STRING;
     string_string_string[1] = MAY_STRING;

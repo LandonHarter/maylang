@@ -79,10 +79,25 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
             }
         }
 
-        struct Var* var = malloc(sizeof(struct Var));
-        var->name = strdup(expr->as.vardecl.name);
-        var->value = value;
-        append_var(env, var);
+        struct Var* existing = NULL;
+        for (struct Env* e = env; e != NULL; e = e->parent) {
+            for (size_t i = 0; i < e->vars->count; i++) {
+                if (strcmp(e->vars->vars[i]->name, expr->as.vardecl.name) == 0) {
+                    existing = e->vars->vars[i];
+                    break;
+                }
+            }
+            if (existing) break;
+        }
+
+        if (existing) {
+            existing->value = value;
+        } else {
+            struct Var* var = malloc(sizeof(struct Var));
+            var->name = strdup(expr->as.vardecl.name);
+            var->value = value;
+            append_var(env, var);
+        }
         return value;
     } else if (expr->type == EXPR_FUNCDECL) {
         struct MayValue* value = malloc(sizeof(struct MayValue));
@@ -205,16 +220,21 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
     } else if (expr->type == EXPR_IF) {
         struct Expr* cond_expr = expr->as.ifcond.condition;
         struct MayValue* cond = evaluate_expr(cond_expr, env);
-        if (cond->type == MAY_FLOAT && cond->as.floating == 1) {
+        int truthy = (cond->type == MAY_FLOAT && cond->as.floating == 1)
+                  || (cond->type == MAY_INT && cond->as.integer != 0);
+        if (truthy) {
             struct Env* ifenv = new_env(env);
-            evaluate(expr->as.ifcond.thenbody, ifenv);
+            struct MayValue* ret = evaluate_block(expr->as.ifcond.thenbody, ifenv);
+            if (ret && ret->type == MAY_RETURN) return ret;
         }
     } else if (expr->type == EXPR_WHILE) {
         struct Expr* cond_expr = expr->as.whilecond.condition;
         struct MayValue* cond = evaluate_expr(cond_expr, env);
-        while (cond->type == MAY_FLOAT && cond->as.floating == 1) {
+        while ((cond->type == MAY_FLOAT && cond->as.floating == 1)
+            || (cond->type == MAY_INT && cond->as.integer != 0)) {
             struct Env* whileenv = new_env(env);
-            evaluate(expr->as.whilecond.thenbody, whileenv);
+            struct MayValue* ret = evaluate_block(expr->as.whilecond.thenbody, whileenv);
+            if (ret && ret->type == MAY_RETURN) return ret;
             cond = evaluate_expr(cond_expr, env);
         }
     }
@@ -233,6 +253,14 @@ void evaluate(struct StmtList* list, struct Env* env) {
     for (int i = 0; i < list->count; i++) {
         struct MayValue* ret = evaluate_stmt(list->stmts[i], env);
     }
+}
+
+struct MayValue* evaluate_block(struct StmtList* list, struct Env* env) {
+    for (int i = 0; i < list->count; i++) {
+        struct MayValue* ret = evaluate_stmt(list->stmts[i], env);
+        if (ret && ret->type == MAY_RETURN) return ret;
+    }
+    return NULL;
 }
 
 struct MayValue* evaluate_urnary(struct Expr* expr, struct Env* env) {
@@ -297,9 +325,13 @@ struct MayValue* evaluate_binary(struct Expr* expr, struct Env* env) {
             result->as.string.val = resstr;
             result->as.string.len = left_len + right_len;
             return result;
-        } else if (expr->as.binary.op == 'e' || expr->as.binary.op == 'n') {
+        } else if (expr->as.binary.op == 'e') {
             result->type = MAY_FLOAT;
             result->as.floating = strcmp(left->as.string.val, right->as.string.val) == 0 ? 1 : 0;
+            return result;
+        } else if (expr->as.binary.op == 'n') {
+            result->type = MAY_FLOAT;
+            result->as.floating = strcmp(left->as.string.val, right->as.string.val) != 0 ? 1 : 0;
             return result;
         }
     }
