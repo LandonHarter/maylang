@@ -67,6 +67,7 @@ struct Expr {
         struct {
             struct Expr* condition;
             struct StmtList* thenbody;
+            struct StmtList* elsebody;
         } ifcond;
 
         struct {

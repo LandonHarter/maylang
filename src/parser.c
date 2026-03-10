@@ -60,11 +60,12 @@ struct Expr* expr_import(char* lib) {
     return e;
 }
 
-struct Expr* expr_if(struct Expr* condition, struct StmtList* thenbody) {
+struct Expr* expr_if(struct Expr* condition, struct StmtList* thenbody, struct StmtList* elsebody) {
     struct Expr* e = malloc(sizeof(struct Expr));
     e->type = EXPR_IF;
     e->as.ifcond.condition = condition;
     e->as.ifcond.thenbody = thenbody;
+    e->as.ifcond.elsebody = elsebody;
     return e;
 }
 
@@ -128,6 +129,8 @@ void expr_free(struct Expr* expr) {
         case EXPR_IF:
             expr_free(expr->as.ifcond.condition);
             free_stmt_list(expr->as.ifcond.thenbody);
+            if (expr->as.ifcond.elsebody)
+                free_stmt_list(expr->as.ifcond.elsebody);
             break;
         case EXPR_WHILE:
             expr_free(expr->as.whilecond.condition);
@@ -519,7 +522,31 @@ static struct Expr* parse_primary(struct Parser* p) {
         struct StmtList* thenbody_ptr = malloc(sizeof(struct StmtList));
         *thenbody_ptr = thenbody;
 
-        return expr_if(condition, thenbody_ptr);
+        struct StmtList* elsebody_ptr = NULL;
+        if (check(p, ELSE)) {
+            advance(p);
+            if (check(p, IF)) {
+                struct Expr* elseif = parse_primary(p);
+                elsebody_ptr = malloc(sizeof(struct StmtList));
+                elsebody_ptr->stmts = NULL;
+                elsebody_ptr->count = 0;
+                elsebody_ptr->capacity = 0;
+                struct Stmt* s = malloc(sizeof(struct Stmt));
+                s->type = STMT_EXPR;
+                s->as.expr = elseif;
+                append_stmt(elsebody_ptr, s);
+            } else if (check(p, LEFT_BRACE)) {
+                advance(p);
+                elsebody_ptr = malloc(sizeof(struct StmtList));
+                *elsebody_ptr = parse_func(p);
+                advance(p);
+            } else {
+                fprintf(stderr, "Expected '{' or 'if' after 'else' on line %u\n", peek(p)->line);
+                exit(-1);
+            }
+        }
+
+        return expr_if(condition, thenbody_ptr, elsebody_ptr);
     } if (check(p, WHILE)) {
         advance(p);
         if (!check(p, LEFT_PAREN)) {

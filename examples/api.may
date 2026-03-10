@@ -1,0 +1,12 @@
+import "io";
+import "api";
+import "string";
+
+string confirm = input("Do you want to know a cool fact about dogs [y,n]: ");
+if ((confirm | upper) == "Y") {
+    print("Retrieving facts...");
+    object res = curl("https://dogapi.dog/api/v2/facts?limit=1", {});
+    res->data[0]->attributes->body | print;
+} else {
+    print("Well, maybe next time!");
+}

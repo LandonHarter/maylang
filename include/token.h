@@ -20,6 +20,7 @@ enum TokenType {
     NUMBER,
 
     IF,
+    ELSE,
     WHILE,
     AND,
     OR,

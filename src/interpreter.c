@@ -236,6 +236,10 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
             struct Env* ifenv = new_env(env);
             struct MayValue* ret = evaluate_block(expr->as.ifcond.thenbody, ifenv);
             if (ret && ret->type == MAY_RETURN) return ret;
+        } else if (expr->as.ifcond.elsebody) {
+            struct Env* elseenv = new_env(env);
+            struct MayValue* ret = evaluate_block(expr->as.ifcond.elsebody, elseenv);
+            if (ret && ret->type == MAY_RETURN) return ret;
         }
     } else if (expr->type == EXPR_WHILE) {
         struct Expr* cond_expr = expr->as.whilecond.condition;
