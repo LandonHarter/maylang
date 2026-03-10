@@ -11,13 +11,17 @@ enum ExprType {
     EXPR_FUNC,
     EXPR_FUNCDECL,
     EXPR_FUNCRETURN,
+    EXPR_FIELD_ACCESS,
     EXPR_CALL,
     EXPR_IMPORT,
     EXPR_IF,
     EXPR_WHILE,
     EXPR_ASSIGN,
     EXPR_BINARY,
-    EXPR_UNARY
+    EXPR_UNARY,
+    EXPR_OBJECT,
+    EXPR_ARRAY,
+    EXPR_INDEX_ACCESS
 };
 
 struct Expr {
@@ -52,6 +56,11 @@ struct Expr {
         } call;
 
         struct {
+            struct Expr* object;
+            char* identifier;
+        } access;
+
+        struct {
             char* lib;
         } import;
 
@@ -80,6 +89,22 @@ struct Expr {
             struct Expr* operand;
             char op;
         } unary;
+
+        struct {
+            char** keys;
+            struct Expr** values;
+            int count;
+        } object;
+
+        struct {
+            struct Expr** elements;
+            int count;
+        } array;
+
+        struct {
+            struct Expr* object;
+            struct Expr* index;
+        } index_access;
     } as;
 };
 

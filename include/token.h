@@ -28,9 +28,13 @@ enum TokenType {
     INT,
     FLOAT,
     STRING_TYPE,
+    OBJECT_TYPE,
+    ARRAY_TYPE,
 
     COMMA,
+    COLON,
     PIPE,
+    ARROW,
     SEMICOLON,
 
     EQUALS,

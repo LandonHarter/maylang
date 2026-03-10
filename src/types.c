@@ -55,28 +55,61 @@ void printmv(struct MayValue* val) {
     printmv_col(val, COLOR_RESET);
 }
 
-void printmv_col(struct MayValue* val, char* color) {
+static char* resolve_color(char* color) {
+    if (strcmp(color, "red") == 0) return COLOR_RED;
+    if (strcmp(color, "green") == 0) return COLOR_GREEN;
+    if (strcmp(color, "yellow") == 0) return COLOR_YELLOW;
+    if (strcmp(color, "blue") == 0) return COLOR_BLUE;
+    if (strcmp(color, "magenta") == 0) return COLOR_MAGENTA;
+    if (strcmp(color, "cyan") == 0) return COLOR_CYAN;
+    return COLOR_RESET;
+}
+
+static void print_indent(char* color_ansi, int depth) {
+    printf("%s", color_ansi);
+    for (int i = 0; i < depth; i++) printf("  ");
+}
+
+static void printmv_inner(struct MayValue* val, char* color, char* color_ansi, int depth) {
     enum MayValueType type = val->type;
     if (type == MAY_VAR) type = val->inferred;
 
-    char* color_ansi = COLOR_RESET;
-    if (strcmp(color, "red") == 0) {
-        color_ansi = COLOR_RED;
-    } else if (strcmp(color, "green") == 0) {
-        color_ansi = COLOR_GREEN;
-    } else if (strcmp(color, "yellow") == 0) {
-        color_ansi = COLOR_YELLOW;
-    } else if (strcmp(color, "blue") == 0) {
-        color_ansi = COLOR_BLUE;
-    } else if (strcmp(color, "magenta") == 0) {
-        color_ansi = COLOR_MAGENTA;
-    } else if (strcmp(color, "cyan") == 0) {
-        color_ansi = COLOR_CYAN;
-    } else if (strcmp(color, "white") == 0) {
-        color_ansi = COLOR_RESET;
+    if (type == MAY_ARRAY) {
+        printf("%s[%s\n", color_ansi, COLOR_RESET);
+        for (int i = 0; i < val->as.array.length; i++) {
+            print_indent(color_ansi, depth + 1);
+            printmv_inner(val->as.array.elements[i], color, color_ansi, depth + 1);
+            if (i < val->as.array.length - 1)
+                printf("%s,", color_ansi);
+            printf("\n");
+        }
+        print_indent(color_ansi, depth);
+        printf("]%s", COLOR_RESET);
+        return;
     }
 
-    printf("%s%s%s\n", color_ansi, mv_to_string(val), COLOR_RESET);
+    if (type == MAY_OBJECT) {
+        printf("%s{%s\n", color_ansi, COLOR_RESET);
+        for (int i = 0; i < val->as.object.num_values; i++) {
+            print_indent(color_ansi, depth + 1);
+            printf("%s: ", val->as.object.names[i]);
+            printmv_inner(val->as.object.values[i], color, color_ansi, depth + 1);
+            if (i < val->as.object.num_values - 1)
+                printf("%s,", color_ansi);
+            printf("\n");
+        }
+        print_indent(color_ansi, depth);
+        printf("}%s", COLOR_RESET);
+        return;
+    }
+
+    printf("%s%s%s", color_ansi, mv_to_string(val), COLOR_RESET);
+}
+
+void printmv_col(struct MayValue* val, char* color) {
+    char* color_ansi = resolve_color(color);
+    printmv_inner(val, color, color_ansi, 0);
+    printf("\n");
 }
 
 char* mvtypestr(enum MayValueType type) {
@@ -87,7 +120,18 @@ char* mvtypestr(enum MayValueType type) {
             return "float";
         case MAY_STRING:
             return "string";
+        case MAY_ARRAY:
+            return "array";
         default:
             return NULL;
     }
+}
+
+struct MayValue* get_field(struct MayValue* obj, char* name) {
+    for (int i = 0; i < obj->as.object.num_values; i++) {
+        if (strcmp(obj->as.object.names[i], name) == 0) {
+            return obj->as.object.values[i];
+        }
+    } 
+    return NULL;
 }

@@ -83,6 +83,12 @@ struct TokenList tokenize(struct Source* filesource) {
                     tok.lexeme[1] = '-';
                     tok.lexeme[2] = '\0';
                     append_token(&list, tok);
+                } else if (follows(&source, ">")) {
+                    tok.type = ARROW;
+                    tok.lexeme[0] = '-';
+                    tok.lexeme[1] = '>';
+                    tok.lexeme[2] = '\0';
+                    append_token(&list, tok);
                 } else {
                     append_basic_token(&list, &tok, MINUS, &c);
                 }
@@ -156,6 +162,9 @@ struct TokenList tokenize(struct Source* filesource) {
                 break;
             case ';':
                 append_basic_token(&list, &tok, SEMICOLON, &c);
+                break;
+            case ':':
+                append_basic_token(&list, &tok, COLON, &c);
                 break;
             case '&':
                 if (follows(&source, "&")) {

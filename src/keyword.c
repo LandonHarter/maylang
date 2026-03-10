@@ -31,5 +31,9 @@ void get_keyword(struct LexerSource* src, struct Token* tok) {
         tok->type = WHILE;
     } else if (matches_keyword(tok->lexeme, "string")) {
         tok->type = STRING_TYPE;
+    } else if (matches_keyword(tok->lexeme, "object")) {
+        tok->type = OBJECT_TYPE;
+    } else if (matches_keyword(tok->lexeme, "array")) {
+        tok->type = ARRAY_TYPE;
     }
 }

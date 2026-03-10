@@ -8,6 +8,8 @@ enum MayValueType {
     MAY_INT,
     MAY_FLOAT,
     MAY_STRING,
+    MAY_OBJECT,
+    MAY_ARRAY,
     MAY_FUNC,
     MAY_BUILTIN_FUNC,
     MAY_RETURN
@@ -42,6 +44,15 @@ struct MayValue {
             char* val;
             int len;
         } string;
+        struct object {
+            char** names;
+            struct MayValue** values;
+            int num_values;
+        } object;
+        struct array_data {
+            struct MayValue** elements;
+            int length;
+        } array;
         struct MayFunc func;
         struct MayBuiltinFunc builtin;
     } as;
@@ -57,3 +68,5 @@ void printmv(struct MayValue* val);
 void printmv_col(struct MayValue* val, char* color);
 
 char* mvtypestr(enum MayValueType type);
+
+struct MayValue* get_field(struct MayValue* obj, char* name);

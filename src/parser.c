@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "lexer.h"
+#include "error.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -147,6 +148,24 @@ void expr_free(struct Expr* expr) {
         case EXPR_FUNCRETURN:
             expr_free(expr->as.funcreturn.expr);
             break;
+        case EXPR_OBJECT:
+            for (int i = 0; i < expr->as.object.count; i++) {
+                free(expr->as.object.keys[i]);
+                expr_free(expr->as.object.values[i]);
+            }
+            free(expr->as.object.keys);
+            free(expr->as.object.values);
+            break;
+        case EXPR_ARRAY:
+            for (int i = 0; i < expr->as.array.count; i++) {
+                expr_free(expr->as.array.elements[i]);
+            }
+            free(expr->as.array.elements);
+            break;
+        case EXPR_INDEX_ACCESS:
+            expr_free(expr->as.index_access.object);
+            expr_free(expr->as.index_access.index);
+            break;
     }
     free(expr);
 }
@@ -212,7 +231,82 @@ static struct Expr* parse_primary(struct Parser* p) {
         }
         advance(p);
         return inner;
-    } if (check(p, VAR) || check(p, INT) || check(p, FLOAT) || check(p, STRING_TYPE)) {
+    } if (check(p, LEFT_BRACKET)) {
+        advance(p);
+
+        struct Expr** elements = NULL;
+        int count = 0;
+        int capacity = 0;
+
+        if (!check(p, RIGHT_BRACKET)) {
+            do {
+                if (count >= capacity) {
+                    capacity = capacity == 0 ? 4 : capacity * 2;
+                    elements = realloc(elements, capacity * sizeof(struct Expr*));
+                }
+                elements[count++] = parse_expression(p);
+            } while (check(p, COMMA) && advance(p));
+        }
+
+        if (!check(p, RIGHT_BRACKET)) {
+            fprintf(stderr, "Expected ']' on line %u\n", peek(p)->line);
+            exit(-1);
+        }
+        advance(p);
+
+        struct Expr* e = malloc(sizeof(struct Expr));
+        e->type = EXPR_ARRAY;
+        e->as.array.elements = elements;
+        e->as.array.count = count;
+        return e;
+    } if (check(p, LEFT_BRACE)) {
+        advance(p);
+
+        char** keys = NULL;
+        struct Expr** values = NULL;
+        int count = 0;
+        int capacity = 0;
+
+        if (!check(p, RIGHT_BRACE)) {
+            do {
+                if (!check(p, IDENTIFIER)) {
+                    fprintf(stderr, "Expected key name on line %u\n", peek(p)->line);
+                    exit(-1);
+                }
+                char* key = strdup(advance(p)->lexeme);
+
+                if (!check(p, COLON)) {
+                    fprintf(stderr, "Expected ':' after key on line %u\n", peek(p)->line);
+                    exit(-1);
+                }
+                advance(p);
+
+                struct Expr* value = parse_expression(p);
+
+                if (count >= capacity) {
+                    capacity = capacity == 0 ? 4 : capacity * 2;
+                    keys = realloc(keys, capacity * sizeof(char*));
+                    values = realloc(values, capacity * sizeof(struct Expr*));
+                }
+                keys[count] = key;
+                values[count] = value;
+                count++;
+            } while (check(p, COMMA) && advance(p));
+        }
+
+        if (!check(p, RIGHT_BRACE)) {
+            fprintf(stderr, "Expected '}' on line %u\n", peek(p)->line);
+            exit(-1);
+        }
+        advance(p);
+
+        struct Expr* e = malloc(sizeof(struct Expr));
+        e->type = EXPR_OBJECT;
+        e->as.object.keys = keys;
+        e->as.object.values = values;
+        e->as.object.count = count;
+        return e;
+    } if (check(p, VAR) || check(p, INT) || check(p, FLOAT) || check(p, STRING_TYPE) || check(p, OBJECT_TYPE) || check(p, ARRAY_TYPE)) {
         struct Token* type_tok = advance(p);
         int decl_type = type_tok->type;
         struct Token* name = advance(p);
@@ -325,6 +419,36 @@ static struct Expr* parse_primary(struct Parser* p) {
             e->type = EXPR_ASSIGN;
             e->as.assign.name = name;
             e->as.assign.value = bin;
+            return e;
+        }
+
+        if (check(p, LEFT_BRACKET)) {
+            advance(p);
+            struct Expr* index = parse_expression(p);
+            if (!check(p, RIGHT_BRACKET)) {
+                fprintf(stderr, "Expected ']' on line %u\n", peek(p)->line);
+                exit(-1);
+            }
+            advance(p);
+            struct Expr* e = malloc(sizeof(struct Expr));
+            e->type = EXPR_INDEX_ACCESS;
+            e->as.index_access.object = expr_variable(name);
+            e->as.index_access.index = index;
+            return e;
+        }
+
+        if (check(p, ARROW)) {
+            advance(p);
+
+            if (peek(p)->type != IDENTIFIER) {
+                throw_runtime_error("Expected field name");
+            }
+
+            struct Expr* e = malloc(sizeof(struct Expr));
+            e->type = EXPR_FIELD_ACCESS;
+            e->as.access.object = expr_variable(name);
+            e->as.access.identifier = strdup(peek(p)->lexeme);
+            advance(p);
             return e;
         }
 
@@ -506,7 +630,7 @@ static struct Expr* parse_expression(struct Parser* p) {
 static struct Stmt* parse_statement(struct Parser* p, struct Env* env) {
     struct Stmt* stmt = malloc(sizeof(struct Stmt));
 
-    if (check(p, VAR) || check(p, INT) || check(p, FLOAT)) {
+    if (check(p, VAR) || check(p, INT) || check(p, FLOAT) || check(p, OBJECT_TYPE) || check(p, ARRAY_TYPE)) {
         stmt->type = STMT_VARDECL;
     } else {
         stmt->type = STMT_EXPR;

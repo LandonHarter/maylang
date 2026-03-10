@@ -35,7 +35,7 @@ void load_io_env(struct Env* env) {
     atprint[0] = MAY_VAR;
     register_builtin(env, "print", io_print, 1, atprint);
 
-    enum MayValueType* atcolprint = malloc(sizeof(enum MayValueType) * 1);
+    enum MayValueType* atcolprint = malloc(sizeof(enum MayValueType) * 2);
     atcolprint[0] = MAY_VAR;
     atcolprint[1] = MAY_STRING;
     register_builtin(env, "colprint", io_print_color, 2, atcolprint);

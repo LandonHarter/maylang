@@ -76,6 +76,16 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
                 }
                 value->type = MAY_STRING;
                 value->inferred = MAY_STRING;
+            } else if (decl == OBJECT_TYPE) {
+                if (value->type != MAY_OBJECT) {
+                    throw_runtime_error("Cannot assign non-object to object variable");
+                }
+                value->inferred = MAY_OBJECT;
+            } else if (decl == ARRAY_TYPE) {
+                if (value->type != MAY_ARRAY) {
+                    throw_runtime_error("Cannot assign non-array to array variable");
+                }
+                value->inferred = MAY_ARRAY;
             }
         }
 
@@ -237,6 +247,63 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
             if (ret && ret->type == MAY_RETURN) return ret;
             cond = evaluate_expr(cond_expr, env);
         }
+    } else if (expr->type == EXPR_FIELD_ACCESS) {
+        struct MayValue* obj = evaluate_expr(expr->as.access.object, env);
+        if (obj->type != MAY_OBJECT) {
+            printf("%i\n", obj->type);
+            throw_runtime_error("Cannot access field on non object type");
+        }
+
+        for (int i = 0; i < obj->as.object.num_values; i++) {
+            if (strcmp(obj->as.object.names[i], expr->as.access.identifier) == 0) {
+                return obj->as.object.values[i];
+            }
+        }
+    } else if (expr->type == EXPR_ARRAY) {
+        struct MayValue* result = malloc(sizeof(struct MayValue));
+        result->type = MAY_ARRAY;
+        result->as.array.length = expr->as.array.count;
+        result->as.array.elements = malloc(expr->as.array.count * sizeof(struct MayValue*));
+        for (int i = 0; i < expr->as.array.count; i++) {
+            result->as.array.elements[i] = evaluate_expr(expr->as.array.elements[i], env);
+        }
+        return result;
+    } else if (expr->type == EXPR_INDEX_ACCESS) {
+        struct MayValue* obj = evaluate_expr(expr->as.index_access.object, env);
+        struct MayValue* idx = evaluate_expr(expr->as.index_access.index, env);
+        int index;
+        if (idx->type == MAY_INT) index = idx->as.integer;
+        else if (idx->type == MAY_FLOAT) index = (int)idx->as.floating;
+        else {
+            throw_runtime_error("Index must be a number");
+            return NULL;
+        }
+        if (obj->type == MAY_ARRAY) {
+            if (index < 0 || index >= obj->as.array.length) {
+                throw_runtime_error("Array index out of bounds");
+                return NULL;
+            }
+            return obj->as.array.elements[index];
+        } else if (obj->type == MAY_OBJECT) {
+            if (index < 0 || index >= obj->as.object.num_values) {
+                throw_runtime_error("Object index out of bounds");
+                return NULL;
+            }
+            return obj->as.object.values[index];
+        }
+        throw_runtime_error("Cannot index non-array type");
+        return NULL;
+    } else if (expr->type == EXPR_OBJECT) {
+        struct MayValue* result = malloc(sizeof(struct MayValue));
+        result->type = MAY_OBJECT;
+        result->as.object.num_values = expr->as.object.count;
+        result->as.object.names = malloc(expr->as.object.count * sizeof(char*));
+        result->as.object.values = malloc(expr->as.object.count * sizeof(struct MayValue*));
+        for (int i = 0; i < expr->as.object.count; i++) {
+            result->as.object.names[i] = strdup(expr->as.object.keys[i]);
+            result->as.object.values[i] = evaluate_expr(expr->as.object.values[i], env);
+        }
+        return result;
     }
 
     return NULL;
