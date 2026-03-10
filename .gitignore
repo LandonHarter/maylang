@@ -7,3 +7,4 @@ examples/dev
 
 CLAUDE.md
 compile_commands.json
+.env

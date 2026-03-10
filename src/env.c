@@ -4,6 +4,7 @@
 #include "lib/math.h"
 #include "lib/io.h"
 #include "lib/string.h"
+#include "lib/dotenv.h"
 #include "lib/default.h"
 #include <stdlib.h>
 #include <string.h>
@@ -26,6 +27,7 @@ struct Env* new_env(struct Env* parent) {
     register_module(env->modules, load_math_module());
     register_module(env->modules, load_io_module());
     register_module(env->modules, load_string_module());
+    register_module(env->modules, load_dotenv_module());
     load_default_module(env);
 
     return env;
