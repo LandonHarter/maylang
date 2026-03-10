@@ -422,34 +422,38 @@ static struct Expr* parse_primary(struct Parser* p) {
             return e;
         }
 
-        if (check(p, LEFT_BRACKET)) {
-            advance(p);
-            struct Expr* index = parse_expression(p);
-            if (!check(p, RIGHT_BRACKET)) {
-                fprintf(stderr, "Expected ']' on line %u\n", peek(p)->line);
-                exit(-1);
+        if (check(p, LEFT_BRACKET) || check(p, ARROW)) {
+            struct Expr* result = expr_variable(name);
+
+            while (check(p, LEFT_BRACKET) || check(p, ARROW)) {
+                if (check(p, LEFT_BRACKET)) {
+                    advance(p);
+                    struct Expr* index = parse_expression(p);
+                    if (!check(p, RIGHT_BRACKET)) {
+                        fprintf(stderr, "Expected ']' on line %u\n", peek(p)->line);
+                        exit(-1);
+                    }
+                    advance(p);
+                    struct Expr* e = malloc(sizeof(struct Expr));
+                    e->type = EXPR_INDEX_ACCESS;
+                    e->as.index_access.object = result;
+                    e->as.index_access.index = index;
+                    result = e;
+                } else {
+                    advance(p);
+                    if (peek(p)->type != IDENTIFIER) {
+                        throw_runtime_error("Expected field name");
+                    }
+                    struct Expr* e = malloc(sizeof(struct Expr));
+                    e->type = EXPR_FIELD_ACCESS;
+                    e->as.access.object = result;
+                    e->as.access.identifier = strdup(peek(p)->lexeme);
+                    advance(p);
+                    result = e;
+                }
             }
-            advance(p);
-            struct Expr* e = malloc(sizeof(struct Expr));
-            e->type = EXPR_INDEX_ACCESS;
-            e->as.index_access.object = expr_variable(name);
-            e->as.index_access.index = index;
-            return e;
-        }
 
-        if (check(p, ARROW)) {
-            advance(p);
-
-            if (peek(p)->type != IDENTIFIER) {
-                throw_runtime_error("Expected field name");
-            }
-
-            struct Expr* e = malloc(sizeof(struct Expr));
-            e->type = EXPR_FIELD_ACCESS;
-            e->as.access.object = expr_variable(name);
-            e->as.access.identifier = strdup(peek(p)->lexeme);
-            advance(p);
-            return e;
+            return result;
         }
 
         if (check(p, LEFT_PAREN)) {
