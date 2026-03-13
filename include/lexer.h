@@ -1,3 +1,4 @@
+#pragma once
 #include "token.h"
 #include "types.h"
 #include "keyword.h"

@@ -5,6 +5,7 @@
 #include "runtime.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 int main(int argc, char* argv[]) {
     #if defined(_WIN32) || defined(_WIN64)
@@ -66,6 +67,12 @@ int main(int argc, char* argv[]) {
 
     struct StmtList ast = parse(&tokens, env);
     debug_printf("Generated AST");
+
+    char* resolved = realpath(fpth, NULL);
+    if (resolved) {
+        push_import(resolved);
+        free(resolved);
+    }
 
     evaluate(&ast, env);
 

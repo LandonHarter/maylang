@@ -6,6 +6,7 @@ typedef struct MayValue* (*MayNativeFn)(struct MayValue** args, int arg_count);
 struct Var {
     char* name;
     struct MayValue* value;
+    int exported;
 };
 
 struct VarList {

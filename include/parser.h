@@ -1,3 +1,4 @@
+#pragma once
 #include "may.h"
 #include "expression.h"
 #include "statement.h"

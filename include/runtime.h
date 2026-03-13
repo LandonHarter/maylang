@@ -1,3 +1,4 @@
+#pragma once
 enum RuntimeFlag {
     FLAG_DEBUG = 1 << 0
 };

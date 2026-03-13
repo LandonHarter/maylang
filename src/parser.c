@@ -32,6 +32,7 @@ struct Expr* expr_vardecl(char* name, struct Expr* initializer, int decl_type) {
     e->as.vardecl.name = name;
     e->as.vardecl.initializer = initializer;
     e->as.vardecl.decl_type = decl_type;
+    e->as.vardecl.exported = 0;
     return e;
 }
 
@@ -43,6 +44,7 @@ struct Expr* expr_funcdecl(char* name, int decl_type, struct StmtList* body, str
     e->as.funcdecl.func = body;
     e->as.funcdecl.params = params;
     e->as.funcdecl.param_count = param_count;
+    e->as.funcdecl.exported = 0;
     return e;
 }
 
@@ -309,6 +311,18 @@ static struct Expr* parse_primary(struct Parser* p) {
         e->as.object.values = values;
         e->as.object.count = count;
         return e;
+    } if (check(p, EXPORT)) {
+        advance(p);
+        if (!check(p, VAR) && !check(p, INT) && !check(p, FLOAT) && !check(p, STRING_TYPE) && !check(p, OBJECT_TYPE) && !check(p, ARRAY_TYPE)) {
+            fprintf(stderr, "Expected declaration after 'export' on line %u\n", peek(p)->line);
+            exit(-1);
+        }
+        struct Expr* decl = parse_primary(p);
+        if (decl->type == EXPR_VARIABLEDECL)
+            decl->as.vardecl.exported = 1;
+        else if (decl->type == EXPR_FUNCDECL)
+            decl->as.funcdecl.exported = 1;
+        return decl;
     } if (check(p, VAR) || check(p, INT) || check(p, FLOAT) || check(p, STRING_TYPE) || check(p, OBJECT_TYPE) || check(p, ARRAY_TYPE)) {
         struct Token* type_tok = advance(p);
         int decl_type = type_tok->type;
@@ -661,7 +675,7 @@ static struct Expr* parse_expression(struct Parser* p) {
 static struct Stmt* parse_statement(struct Parser* p, struct Env* env) {
     struct Stmt* stmt = malloc(sizeof(struct Stmt));
 
-    if (check(p, VAR) || check(p, INT) || check(p, FLOAT) || check(p, OBJECT_TYPE) || check(p, ARRAY_TYPE)) {
+    if (check(p, EXPORT) || check(p, VAR) || check(p, INT) || check(p, FLOAT) || check(p, OBJECT_TYPE) || check(p, ARRAY_TYPE)) {
         stmt->type = STMT_VARDECL;
     } else {
         stmt->type = STMT_EXPR;

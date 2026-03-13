@@ -6,10 +6,101 @@
 #include "statement.h"
 #include "env.h"
 #include "module.h"
+#include "lexer.h"
+#include "parser.h"
+#include "source.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <libgen.h>
+
+#define MAX_IMPORT_DEPTH 64
+
+static char* import_stack[MAX_IMPORT_DEPTH];
+static int import_depth = 0;
+
+static int is_importing(const char* path) {
+    for (int i = 0; i < import_depth; i++) {
+        if (strcmp(import_stack[i], path) == 0) return 1;
+    }
+    return 0;
+}
+
+void push_import(const char* path) {
+    if (import_depth >= MAX_IMPORT_DEPTH) {
+        throw_runtime_error("Import depth exceeded");
+    }
+    import_stack[import_depth++] = strdup(path);
+}
+
+void pop_import() {
+    import_depth--;
+    free(import_stack[import_depth]);
+}
+
+static void import_may_file(struct Env* env, const char* path) {
+    char* full_path = NULL;
+    if (path[0] != '/' && import_depth > 0) {
+        char* parent = strdup(import_stack[import_depth - 1]);
+        char* dir = dirname(parent);
+        int len = strlen(dir) + 1 + strlen(path) + 1;
+        full_path = malloc(len);
+        snprintf(full_path, len, "%s/%s", dir, path);
+        free(parent);
+    }
+
+    char* resolved = realpath(full_path ? full_path : path, NULL);
+    free(full_path);
+    if (!resolved) {
+        fprintf(stderr, "Cannot find file: %s\n", path);
+        exit(-1);
+    }
+
+    if (is_importing(resolved)) {
+        fprintf(stderr, "Circular import detected: %s\n", path);
+        exit(-1);
+    }
+
+    push_import(resolved);
+
+    FILE* fptr = fopen(resolved, "r");
+    if (!fptr) {
+        fprintf(stderr, "Error opening import: %s\n", path);
+        exit(-1);
+    }
+    fseek(fptr, 0L, SEEK_END);
+    unsigned long fsize = ftell(fptr);
+    rewind(fptr);
+    char* fbuf = malloc(fsize + 1);
+    fread(fbuf, 1, fsize, fptr);
+    fbuf[fsize] = '\0';
+    fclose(fptr);
+
+    struct Source source = {resolved, fbuf};
+    struct TokenList tokens = tokenize(&source);
+    free(fbuf);
+
+    struct Env* import_env = new_env(NULL);
+    struct StmtList ast = parse(&tokens, import_env);
+    evaluate(&ast, import_env);
+
+    for (size_t i = 0; i < import_env->vars->count; i++) {
+        struct Var* v = import_env->vars->vars[i];
+        if (v->exported) {
+            struct Var* copy = malloc(sizeof(struct Var));
+            copy->name = strdup(v->name);
+            copy->value = v->value;
+            copy->exported = 0;
+            append_var(env, copy);
+        }
+    }
+
+    free_stmt_list(&ast);
+    free_token_list(&tokens);
+    pop_import();
+    free(resolved);
+}
 
 static int is_numeric(struct MayValue* val) {
     enum MayValueType t = val->type == MAY_VAR ? val->inferred : val->type;
@@ -102,10 +193,12 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
 
         if (existing) {
             existing->value = value;
+            existing->exported = expr->as.vardecl.exported;
         } else {
             struct Var* var = malloc(sizeof(struct Var));
             var->name = strdup(expr->as.vardecl.name);
             var->value = value;
+            var->exported = expr->as.vardecl.exported;
             append_var(env, var);
         }
         return value;
@@ -121,6 +214,7 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         struct Var* var = malloc(sizeof(struct Var));
         var->name = strdup(expr->as.funcdecl.name);
         var->value = value;
+        var->exported = expr->as.funcdecl.exported;
         append_var(env, var);
         return value;
     } else if (expr->type == EXPR_FUNCRETURN) {
@@ -226,7 +320,13 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         }
         return value;
     } else if (expr->type == EXPR_IMPORT) {
-        load_module(env, expr->as.import.lib);
+        char* lib = expr->as.import.lib;
+        int len = strlen(lib);
+        if (len > 4 && strcmp(lib + len - 4, ".may") == 0) {
+            import_may_file(env, lib);
+        } else {
+            load_module(env, lib);
+        }
     } else if (expr->type == EXPR_IF) {
         struct Expr* cond_expr = expr->as.ifcond.condition;
         struct MayValue* cond = evaluate_expr(cond_expr, env);

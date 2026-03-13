@@ -25,6 +25,8 @@ void get_keyword(struct LexerSource* src, struct Token* tok) {
         tok->type = RETURN;
     } else if (matches_keyword(tok->lexeme, "import")) {
         tok->type = IMPORT;
+    } else if (matches_keyword(tok->lexeme, "export")) {
+        tok->type = EXPORT;
     } else if (matches_keyword(tok->lexeme, "if")) {
         tok->type = IF;
     } else if (matches_keyword(tok->lexeme, "else")) {

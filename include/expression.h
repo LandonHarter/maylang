@@ -1,3 +1,4 @@
+#pragma once
 struct Param {
     char* name;
     int type;
@@ -35,6 +36,7 @@ struct Expr {
             char* name;
             struct Expr* initializer;
             int decl_type;
+            int exported;
         } vardecl;
 
         struct {
@@ -43,6 +45,7 @@ struct Expr {
             int decl_type;
             struct Param* params;
             int param_count;
+            int exported;
         } funcdecl;
 
         struct {
