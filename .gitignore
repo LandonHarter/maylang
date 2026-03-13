@@ -3,6 +3,7 @@ compile.sh
 .cache/
 
 may
+may_debug
 examples/dev
 
 CLAUDE.md

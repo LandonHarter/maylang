@@ -1,0 +1,13 @@
+import "http";
+import "io";
+
+int server = create_server(8080);
+print("Server running on port 8080");
+
+while (1) {
+    int client = accept_client(server);
+    object req = read_request(client);
+    print(req->method + " " + req->path);
+    send_html(client, "<h1>Thank you for using MayLang!</h1>");
+}
+
