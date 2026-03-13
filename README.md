@@ -79,6 +79,26 @@ struct MayValue* string_upper(struct MayValue** args, int arg_count) {
 }
 ```
 
+## Web Development
+
+Since we won't have access to React to build a bunch of AI slop web apps, I figured I would bring web development to May
+with the http module. You can easily create an http web server to serve html to an end user:
+
+```js
+import "http";
+import "io";
+
+int server = create_server(8080);
+print("Server running on port 8080");
+
+while (1) {
+    int client = accept_client(server);
+    object req = read_request(client);
+    print(req->method + " " + req->path);
+    send_html(client, "<h1>Thank you for using MayLang!</h1>");
+}
+```
+
 ## Comments
 
 Comments don't exist. This is because most of them are useless. If you write clean code, there is no need for comments anyway.
