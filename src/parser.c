@@ -153,6 +153,9 @@ void expr_free(struct Expr* expr) {
         case EXPR_FUNCRETURN:
             expr_free(expr->as.funcreturn.expr);
             break;
+        case EXPR_BREAK:
+        case EXPR_CONTINUE:
+            break;
         case EXPR_OBJECT:
             for (int i = 0; i < expr->as.object.count; i++) {
                 free(expr->as.object.keys[i]);
@@ -507,6 +510,16 @@ static struct Expr* parse_primary(struct Parser* p) {
     } if (check(p, RETURN)) {
         advance(p);
         return expr_return(parse_expression(p));
+    } if (check(p, BREAK)) {
+        advance(p);
+        struct Expr* e = malloc(sizeof(struct Expr));
+        e->type = EXPR_BREAK;
+        return e;
+    } if (check(p, CONTINUE)) {
+        advance(p);
+        struct Expr* e = malloc(sizeof(struct Expr));
+        e->type = EXPR_CONTINUE;
+        return e;
     } if (check(p, IMPORT)) {
         advance(p);
         if (!check(p, STRING)) {

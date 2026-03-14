@@ -15,6 +15,8 @@ enum TokenType {
 
     IDENTIFIER,
     RETURN,
+    BREAK,
+    CONTINUE,
     IMPORT,
     EXPORT,
     STRING,

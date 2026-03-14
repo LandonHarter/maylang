@@ -13,7 +13,9 @@ enum MayValueType {
     MAY_ARRAY,
     MAY_FUNC,
     MAY_BUILTIN_FUNC,
-    MAY_RETURN
+    MAY_RETURN,
+    MAY_BREAK,
+    MAY_CONTINUE
 };
 
 struct Param;

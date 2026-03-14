@@ -224,6 +224,14 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         ret->inferred = val->type;
         ret->type = MAY_RETURN;
         return ret;
+    } else if (expr->type == EXPR_BREAK) {
+        struct MayValue* val = malloc(sizeof(struct MayValue));
+        val->type = MAY_BREAK;
+        return val;
+    } else if (expr->type == EXPR_CONTINUE) {
+        struct MayValue* val = malloc(sizeof(struct MayValue));
+        val->type = MAY_CONTINUE;
+        return val;
     } else if (expr->type == EXPR_CALL) {
         struct MayValue* func = lookup_var(env, expr->as.call.name);
         if (!func) {
@@ -335,11 +343,11 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         if (truthy) {
             struct Env* ifenv = new_env(env);
             struct MayValue* ret = evaluate_block(expr->as.ifcond.thenbody, ifenv);
-            if (ret && ret->type == MAY_RETURN) return ret;
+            if (ret && (ret->type == MAY_RETURN || ret->type == MAY_BREAK || ret->type == MAY_CONTINUE)) return ret;
         } else if (expr->as.ifcond.elsebody) {
             struct Env* elseenv = new_env(env);
             struct MayValue* ret = evaluate_block(expr->as.ifcond.elsebody, elseenv);
-            if (ret && ret->type == MAY_RETURN) return ret;
+            if (ret && (ret->type == MAY_RETURN || ret->type == MAY_BREAK || ret->type == MAY_CONTINUE)) return ret;
         }
     } else if (expr->type == EXPR_WHILE) {
         struct Expr* cond_expr = expr->as.whilecond.condition;
@@ -349,6 +357,11 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
             struct Env* whileenv = new_env(env);
             struct MayValue* ret = evaluate_block(expr->as.whilecond.thenbody, whileenv);
             if (ret && ret->type == MAY_RETURN) return ret;
+            if (ret && ret->type == MAY_BREAK) break;
+            if (ret && ret->type == MAY_CONTINUE) {
+                cond = evaluate_expr(cond_expr, env);
+                continue;
+            }
             cond = evaluate_expr(cond_expr, env);
         }
     } else if (expr->type == EXPR_FIELD_ACCESS) {
@@ -429,7 +442,7 @@ void evaluate(struct StmtList* list, struct Env* env) {
 struct MayValue* evaluate_block(struct StmtList* list, struct Env* env) {
     for (int i = 0; i < list->count; i++) {
         struct MayValue* ret = evaluate_stmt(list->stmts[i], env);
-        if (ret && ret->type == MAY_RETURN) return ret;
+        if (ret && (ret->type == MAY_RETURN || ret->type == MAY_BREAK || ret->type == MAY_CONTINUE)) return ret;
     }
     return NULL;
 }

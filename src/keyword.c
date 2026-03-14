@@ -33,6 +33,10 @@ void get_keyword(struct LexerSource* src, struct Token* tok) {
         tok->type = ELSE;
     } else if (matches_keyword(tok->lexeme, "while")) {
         tok->type = WHILE;
+    } else if (matches_keyword(tok->lexeme, "break")) {
+        tok->type = BREAK;
+    } else if (matches_keyword(tok->lexeme, "continue")) {
+        tok->type = CONTINUE;
     } else if (matches_keyword(tok->lexeme, "string")) {
         tok->type = STRING_TYPE;
     } else if (matches_keyword(tok->lexeme, "object")) {

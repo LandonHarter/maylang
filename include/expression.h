@@ -22,7 +22,9 @@ enum ExprType {
     EXPR_UNARY,
     EXPR_OBJECT,
     EXPR_ARRAY,
-    EXPR_INDEX_ACCESS
+    EXPR_INDEX_ACCESS,
+    EXPR_BREAK,
+    EXPR_CONTINUE
 };
 
 struct Expr {
