@@ -7,6 +7,8 @@
 #include "lib/dotenv.h"
 #include "lib/api.h"
 #include "lib/http.h"
+#include "lib/fs.h"
+#include "lib/html.h"
 #include "lib/default.h"
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +34,8 @@ struct Env* new_env(struct Env* parent) {
     register_module(env->modules, load_dotenv_module());
     register_module(env->modules, load_api_module());
     register_module(env->modules, load_http_module());
+    register_module(env->modules, load_fs_module());
+    register_module(env->modules, load_html_module());
     load_default_module(env);
 
     return env;
