@@ -277,11 +277,21 @@ static struct Expr* parse_primary(struct Parser* p) {
 
         if (!check(p, RIGHT_BRACE)) {
             do {
-                if (!check(p, IDENTIFIER)) {
+                if (!check(p, IDENTIFIER) && !check(p, STRING)) {
                     fprintf(stderr, "Expected key name on line %u\n", peek(p)->line);
                     exit(-1);
                 }
-                char* key = strdup(advance(p)->lexeme);
+                int is_str = check(p, STRING);
+                char* lexeme = advance(p)->lexeme;
+                char* key;
+                if (is_str) {
+                    int len = strlen(lexeme);
+                    key = malloc(len - 1);
+                    memcpy(key, lexeme + 1, len - 2);
+                    key[len - 2] = '\0';
+                } else {
+                    key = strdup(lexeme);
+                }
 
                 if (!check(p, COLON)) {
                     fprintf(stderr, "Expected ':' after key on line %u\n", peek(p)->line);

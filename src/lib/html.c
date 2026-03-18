@@ -59,6 +59,27 @@ struct MayValue* string_to_value(char* str) {
     return ret;
 }
 
+struct MayValue* html_router(struct MayValue** args, int arg_count) {
+    struct MayValue* req = args[0];
+    struct MayValue* routes = args[1];
+
+    struct MayValue* ret = malloc(sizeof(struct MayValue));
+    ret->type = MAY_STRING;
+
+    char* path = get_field(req, "path")->as.string.val;
+    for (int i = 0; i < routes->as.object.num_values; i++) {
+        if (strcmp(routes->as.object.names[i], path) == 0) {
+            ret->as.string.val = routes->as.object.values[i]->as.string.val;
+            ret->as.string.len = strlen(ret->as.string.val);
+            return ret;
+        }
+    }
+
+    ret->as.string.val = "404";
+    ret->as.string.len = 4;
+    return ret;
+}
+
 struct MayValue* html_element(struct MayValue** args, int arg_count) {
     char* tag = args[0]->as.string.val;
     struct MayValue* children = get_field(args[1], "children");
@@ -141,6 +162,12 @@ struct MayValue* html_script(struct MayValue** args, int arg_count) {
 }
 
 void load_html_env(struct Env* env) {
+    enum MayValueType* atrouter = malloc(sizeof(enum MayValueType) * 2);
+    atrouter[0] = MAY_OBJECT;
+    atrouter[1] = MAY_OBJECT;
+
+    register_builtin(env, "router", html_router, 2, atrouter);
+
     enum MayValueType* quick_element = malloc(sizeof(enum MayValueType) * 1);
     quick_element[0] = MAY_OBJECT;
 
