@@ -1,5 +1,46 @@
 import "http";
 import "io";
+import "html";
+
+string component(string name) {
+    return p({
+        children: [
+            name
+        ]
+    });
+}
+
+string root() {
+    return html({
+        children: [
+            head({
+                children: [
+                    script({
+                        attributes: {
+                            src: "https://cdn.tailwindcss.com"
+                        }
+                    })
+                ]
+            }),
+            body({
+                children: [
+                    h1({
+                        children: [
+                            "Hello world!"
+                        ],
+                        attributes: {
+                            class: "text-blue-500"
+                        }
+                    }),
+                    component("I just wanted to show you components work")
+                ],
+                attributes: {
+                    class: "p-4"
+                }
+            })
+        ]
+    });
+}
 
 int server = create_server(8080);
 print("Server running on port 8080");
@@ -8,6 +49,6 @@ while (1) {
     int client = accept_client(server);
     object req = read_request(client);
     print(req->method + " " + req->path);
-    send_html(client, "<h1>Thank you for using MayLang!</h1>");
+    send_html(client, root());
 }
 
