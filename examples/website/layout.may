@@ -1,0 +1,18 @@
+export string layout(string children) {
+    return html({
+        children: [
+            head({
+                children: [
+                    script({
+                        attributes: {
+                            src: "https://cdn.tailwindcss.com"
+                        }
+                    })
+                ]
+            }),
+            body({
+                children: [children]
+            })
+        ]
+    });
+}

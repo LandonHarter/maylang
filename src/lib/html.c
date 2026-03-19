@@ -109,6 +109,10 @@ struct MayValue* html_p(struct MayValue** args, int arg_count) {
     return quick_html_element("p", args);
 }
 
+struct MayValue* html_a(struct MayValue** args, int arg_count) {
+    return quick_html_element("a", args);
+}
+
 struct MayValue* html_h1(struct MayValue** args, int arg_count) {
     return quick_html_element("h1", args);
 }
@@ -175,6 +179,7 @@ void load_html_env(struct Env* env) {
     register_builtin(env, "body", html_body, 1, quick_element);
     register_builtin(env, "head", html_head, 1, quick_element);
     register_builtin(env, "p", html_p, 1, quick_element);
+    register_builtin(env, "a", html_a, 1, quick_element);
     register_builtin(env, "h1", html_h1, 1, quick_element);
     register_builtin(env, "h2", html_h2, 1, quick_element);
     register_builtin(env, "h3", html_h3, 1, quick_element);

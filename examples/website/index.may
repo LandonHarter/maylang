@@ -1,0 +1,23 @@
+export string home() {
+    return div({
+        children: [
+            h1({
+                children: [
+                    "Home page!"
+                ]
+            }),
+            a({
+                children: [
+                    "Click to go about page"
+                ],
+                attributes: {
+                    href: "/about",
+                    class: "underline text-cyan-600"
+                }
+            })
+        ],
+        attributes: {
+            class: "p-4 flex flex-col gap-4"
+        }
+    });
+}
