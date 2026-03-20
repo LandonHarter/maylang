@@ -1,0 +1,57 @@
+import "http";
+import "io";
+import "html";
+
+int count = 0;
+
+string counter() {
+    return div({
+        children: [
+            h1({
+                children: [toString(count)],
+                attributes: { class: "text-4xl" }
+            }),
+            button({
+                children: ["Increment"],
+                attributes: {
+                    "hx-post": "/increment",
+                    "hx-target": "#counter",
+                    class: "bg-blue-500 text-white px-4 py-2 rounded"
+                }
+            })
+        ],
+        attributes: { id: "counter" }
+    });
+}
+
+string home() {
+    return html({
+        children: [
+            head({
+                children: [
+                    script({ attributes: { src: "https://cdn.tailwindcss.com" } }),
+                    script({ attributes: { src: "https://unpkg.com/htmx.org@2.0.4" } })
+                ]
+            }),
+            body({
+                children: [counter()]
+            })
+        ]
+    });
+}
+
+int server = create_server(8080);
+print("Server running on port 8080");
+
+while (1) {
+    int client = accept_client(server);
+    object req = read_request(client);
+    print(req->method + " " + req->path);
+
+    if (req->path == "/increment") {
+        count = count + 1;
+        send_html(client, counter_fragment());
+    } else {
+        send_html(client, router(req, { "/": home() }));
+    }
+}

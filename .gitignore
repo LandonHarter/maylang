@@ -2,7 +2,7 @@ compile.sh
 .claude/
 .cache/
 
-may
+bin/
 may_debug
 examples/dev
 
