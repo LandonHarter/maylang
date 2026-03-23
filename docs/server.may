@@ -1,0 +1,19 @@
+import "io";
+import "http";
+import "html";
+
+import "layout.may";
+
+import "pages/introduction.may";
+
+int server = create_server(3000);
+print("Server running on port 3000");
+
+while (1) {
+    int client = accept_client(server);
+    object req = read_request(client);
+    send_html(client, layout(router(req, {
+        "/": introduction()
+    })));
+}
+

@@ -1,0 +1,9 @@
+export string layout(string children) {
+    return html({
+        children: [
+            body({
+                children: [children]
+            })
+        ]
+    });
+}
