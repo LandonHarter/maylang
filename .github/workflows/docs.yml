@@ -1,0 +1,72 @@
+name: Docs
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t may-docs ./docs
+
+      - name: Run docs server
+        run: docker run -d -p 3000:3000 --name may-docs may-docs
+
+      - name: Wait for server
+        run: |
+          for i in $(seq 1 15); do
+            if curl -s http://localhost:3000 > /dev/null; then
+              echo "Server is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Server failed to start"
+          docker logs may-docs
+          exit 1
+
+      - name: Scrape static HTML
+        run: |
+          mkdir -p _site
+          grep -oP '"\K/[^"]*(?=":)' docs/server.may | while read route; do
+            if [ "$route" = "/" ]; then
+              curl -sf http://localhost:3000/ -o _site/index.html
+            else
+              mkdir -p "_site${route}"
+              curl -sf "http://localhost:3000${route}" -o "_site${route}/index.html"
+            fi
+          done
+
+      - name: Stop container
+        run: docker stop may-docs
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
