@@ -81,7 +81,7 @@ static void import_may_file(struct Env* env, const char* path) {
     struct TokenList tokens = tokenize(&source);
     free(fbuf);
 
-    struct Env* import_env = new_env(NULL);
+    struct Env* import_env = new_env(env);
     struct StmtList ast = parse(&tokens, import_env);
     evaluate(&ast, import_env);
 
@@ -210,6 +210,7 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         value->as.func.return_type = expr->as.funcdecl.decl_type;
         value->as.func.params = expr->as.funcdecl.params;
         value->as.func.param_count = expr->as.funcdecl.param_count;
+        value->as.func.closure = env;
 
         struct Var* var = malloc(sizeof(struct Var));
         var->name = strdup(expr->as.funcdecl.name);
@@ -267,7 +268,8 @@ struct MayValue* evaluate_expr(struct Expr* expr, struct Env* env) {
         }
 
         struct MayValue* result = NULL;
-        struct Env* call_env = new_env(env);
+        struct Env* parent_env = func->as.func.closure ? func->as.func.closure : env;
+        struct Env* call_env = new_env(parent_env);
 
         for (int i = 0; i < func->as.func.param_count; i++) {
             struct MayValue* arg_val = evaluate_expr(expr->as.call.args[i], env);

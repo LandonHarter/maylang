@@ -1,0 +1,72 @@
+export string stdlib_html() {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Standard Library"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "mb-2" }
+            }),
+            heading("html"),
+            lead("Build HTML pages with function calls. Each builder returns a string you can compose into larger documents."),
+            paragraph("Import:"),
+            code_block("import &quot;html&quot;;"),
+
+            subheading("The builder pattern"),
+            paragraph("Every element function takes one object argument. Inside it you can pass two fields: children (an array) and attributes (an object)."),
+            code_block("h1({\n    children: [&quot;Hello, world&quot;],\n    attributes: { class: &quot;text-2xl font-bold&quot; }\n});"),
+            paragraph("Children can be strings or other element calls, so you can nest:"),
+            code_block("div({\n    children: [\n        h1({ children: [&quot;Title&quot;] }),\n        p({ children: [&quot;Some prose.&quot;] })\n    ]\n});"),
+
+            subheading("Built-in elements"),
+            paragraph("Each of these is a function with the same signature as h1 above:"),
+            div({
+                children: [
+                    elem_pill("html"),
+                    elem_pill("head"),
+                    elem_pill("body"),
+                    elem_pill("div"),
+                    elem_pill("span"),
+                    elem_pill("p"),
+                    elem_pill("a"),
+                    elem_pill("h1"),
+                    elem_pill("h2"),
+                    elem_pill("h3"),
+                    elem_pill("h4"),
+                    elem_pill("h5"),
+                    elem_pill("h6"),
+                    elem_pill("img"),
+                    elem_pill("form"),
+                    elem_pill("button"),
+                    elem_pill("video"),
+                    elem_pill("script")
+                ],
+                attributes: { class: "flex flex-wrap gap-2 my-4" }
+            }),
+
+            subheading("element"),
+            paragraph("If a tag does not have a dedicated builder, fall back to element. Pass the tag name as the first argument and the same options object as the second:"),
+            code_block("element(&quot;ul&quot;, {\n    children: [\n        element(&quot;li&quot;, { children: [&quot;First&quot;] }),\n        element(&quot;li&quot;, { children: [&quot;Second&quot;] })\n    ]\n});"),
+
+            subheading("router"),
+            paragraph("Match an incoming request path against a map of routes. Returns the matched body, or the string &quot;404&quot; if nothing matches."),
+            code_block("send_html(client, router(req, {\n    &quot;/&quot;: home(),\n    &quot;/about&quot;: about()\n}));"),
+
+            subheading("Tips"),
+            callout("Element builders return plain strings. You can store them in variables, pass them between functions, and compose them like any other value."),
+            paragraph("There is no virtual DOM and no escaping — the strings you provide are emitted verbatim. If you want to render user input safely, escape it before passing it in.")
+        ]
+    });
+}
+
+string elem_pill(string name) {
+    return span({
+        children: [name],
+        attributes: {
+            class: "font-mono text-xs px-2 py-1 rounded bg-slate-800/80 text-emerald-300 border border-slate-700"
+        }
+    });
+}

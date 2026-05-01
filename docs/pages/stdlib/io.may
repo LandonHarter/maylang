@@ -1,0 +1,31 @@
+export string stdlib_io() {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Standard Library"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "mb-2" }
+            }),
+            heading("io"),
+            lead("Read input from the user and write text to the terminal."),
+            paragraph("Import:"),
+            code_block("import &quot;io&quot;;"),
+
+            subheading("print"),
+            paragraph("Write a value to standard output, followed by a newline."),
+            code_block("print(&quot;Hello world!&quot;);"),
+
+            subheading("colprint"),
+            paragraph("Write a value to standard output in a named color. Useful for log levels and CLI tools."),
+            code_block("colprint(&quot;Something went wrong&quot;, &quot;red&quot;);\ncolprint(&quot;Loaded successfully&quot;, &quot;green&quot;);"),
+
+            subheading("input"),
+            paragraph("Print a prompt and return the line the user typed."),
+            code_block("string name = input(&quot;What is your name? &quot;);\nprint(&quot;Hello, &quot; + name);")
+        ]
+    });
+}

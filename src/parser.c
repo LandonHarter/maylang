@@ -225,9 +225,9 @@ static struct Expr* parse_primary(struct Parser* p) {
         return expr_number(val);
     } if (check(p, STRING)) {
         struct Token* tok = advance(p);
-        int len = strlen(tok->lexeme) - 2;
+        int len = tok->literal->as.string.len;
         char* val = malloc(len + 1);
-        strncpy(val, tok->lexeme + 1, len);
+        memcpy(val, tok->literal->as.string.val, len);
         val[len] = '\0';
         return expr_string(val);
     } if (check(p, LEFT_PAREN)) {
@@ -282,15 +282,15 @@ static struct Expr* parse_primary(struct Parser* p) {
                     exit(-1);
                 }
                 int is_str = check(p, STRING);
-                char* lexeme = advance(p)->lexeme;
+                struct Token* key_tok = advance(p);
                 char* key;
                 if (is_str) {
-                    int len = strlen(lexeme);
-                    key = malloc(len - 1);
-                    memcpy(key, lexeme + 1, len - 2);
-                    key[len - 2] = '\0';
+                    int len = key_tok->literal->as.string.len;
+                    key = malloc(len + 1);
+                    memcpy(key, key_tok->literal->as.string.val, len);
+                    key[len] = '\0';
                 } else {
-                    key = strdup(lexeme);
+                    key = strdup(key_tok->lexeme);
                 }
 
                 if (!check(p, COLON)) {

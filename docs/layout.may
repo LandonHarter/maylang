@@ -1,8 +1,274 @@
-export string layout(string children) {
+export string nav_link(string href, string text, string current) {
+    string base = "block px-3 py-2 rounded-md text-sm transition-colors ";
+    string cls = "";
+    if (href == current) {
+        cls = base + "bg-emerald-500/10 text-emerald-300 font-medium border-l-2 border-emerald-400 pl-[10px]";
+    } else {
+        cls = base + "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60";
+    }
+    return a({
+        children: [text],
+        attributes: { href: href, class: cls }
+    });
+}
+
+export string nav_heading(string title) {
+    return element("h4", {
+        children: [title],
+        attributes: { class: "text-xs font-semibold uppercase tracking-wider text-slate-500 px-3 mb-2 mt-6" }
+    });
+}
+
+export string sidebar(string current) {
+    return element("aside", {
+        children: [
+            div({
+                children: [
+                    a({
+                        children: [
+                            div({
+                                children: [
+                                    span({
+                                        children: ["M"],
+                                        attributes: { class: "text-emerald-400 font-bold text-2xl" }
+                                    })
+                                ],
+                                attributes: { class: "w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center" }
+                            }),
+                            div({
+                                children: [
+                                    div({
+                                        children: ["May"],
+                                        attributes: { class: "text-white font-semibold leading-tight" }
+                                    }),
+                                    div({
+                                        children: ["Documentation"],
+                                        attributes: { class: "text-xs text-slate-500" }
+                                    })
+                                ]
+                            })
+                        ],
+                        attributes: {
+                            href: "/",
+                            class: "flex items-center gap-3 px-3 py-2 mb-4"
+                        }
+                    }),
+                    nav_heading("Getting Started"),
+                    div({
+                        children: [
+                            nav_link("/", "Introduction", current),
+                            nav_link("/install", "Installation", current),
+                            nav_link("/quickstart", "Quick Start", current)
+                        ],
+                        attributes: { class: "flex flex-col gap-1" }
+                    }),
+                    nav_heading("Language"),
+                    div({
+                        children: [
+                            nav_link("/syntax", "Syntax", current),
+                            nav_link("/types", "Types", current),
+                            nav_link("/modules", "Modules", current)
+                        ],
+                        attributes: { class: "flex flex-col gap-1" }
+                    }),
+                    nav_heading("Standard Library"),
+                    div({
+                        children: [
+                            nav_link("/stdlib/io", "io", current),
+                            nav_link("/stdlib/string", "string", current),
+                            nav_link("/stdlib/math", "math", current),
+                            nav_link("/stdlib/http", "http", current),
+                            nav_link("/stdlib/html", "html", current),
+                            nav_link("/stdlib/api", "api", current),
+                            nav_link("/stdlib/fs", "fs", current),
+                            nav_link("/stdlib/dotenv", "dotenv", current)
+                        ],
+                        attributes: { class: "flex flex-col gap-1" }
+                    }),
+                    nav_heading("Examples"),
+                    div({
+                        children: [
+                            nav_link("/examples", "Showcase", current)
+                        ],
+                        attributes: { class: "flex flex-col gap-1" }
+                    })
+                ],
+                attributes: { class: "p-4" }
+            })
+        ],
+        attributes: {
+            class: "w-64 shrink-0 bg-slate-950 border-r border-slate-800 h-screen sticky top-0 overflow-y-auto"
+        }
+    });
+}
+
+export string topbar() {
+    return element("header", {
+        children: [
+            div({
+                children: [
+                    div({
+                        children: [
+                            span({
+                                children: ["v0.1"],
+                                attributes: { class: "text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20" }
+                            }),
+                            span({
+                                children: ["A scripting language for the web"],
+                                attributes: { class: "text-sm text-slate-400" }
+                            })
+                        ],
+                        attributes: { class: "flex items-center gap-3" }
+                    }),
+                    div({
+                        children: [
+                            a({
+                                children: ["GitHub"],
+                                attributes: {
+                                    href: "https://github.com/LandonHarter/maylang",
+                                    class: "text-sm text-slate-400 hover:text-white transition-colors"
+                                }
+                            })
+                        ],
+                        attributes: { class: "flex items-center gap-4" }
+                    })
+                ],
+                attributes: { class: "flex items-center justify-between max-w-5xl mx-auto px-8 py-4" }
+            })
+        ],
+        attributes: {
+            class: "border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-10"
+        }
+    });
+}
+
+export string code_block(string content) {
+    return element("pre", {
+        children: [
+            element("code", {
+                children: [content],
+                attributes: { class: "text-sm text-slate-200 font-mono leading-relaxed" }
+            })
+        ],
+        attributes: {
+            class: "bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto my-4"
+        }
+    });
+}
+
+export string inline_code(string content) {
+    return element("code", {
+        children: [content],
+        attributes: {
+            class: "bg-slate-800/80 text-emerald-300 font-mono text-[0.9em] px-1.5 py-0.5 rounded"
+        }
+    });
+}
+
+export string heading(string text) {
+    return h1({
+        children: [text],
+        attributes: { class: "text-4xl font-bold text-white mb-4 mt-2 tracking-tight" }
+    });
+}
+
+export string subheading(string text) {
+    return h2({
+        children: [text],
+        attributes: { class: "text-2xl font-semibold text-white mb-3 mt-10 tracking-tight border-b border-slate-800 pb-2" }
+    });
+}
+
+export string minor_heading(string text) {
+    return h3({
+        children: [text],
+        attributes: { class: "text-lg font-semibold text-slate-100 mb-2 mt-6" }
+    });
+}
+
+export string lead(string text) {
+    return p({
+        children: [text],
+        attributes: { class: "text-lg text-slate-400 mb-8 leading-relaxed" }
+    });
+}
+
+export string paragraph(string text) {
+    return p({
+        children: [text],
+        attributes: { class: "text-slate-300 mb-4 leading-relaxed" }
+    });
+}
+
+export string callout(string text) {
+    return div({
+        children: [text],
+        attributes: {
+            class: "border-l-4 border-emerald-500/60 bg-emerald-500/5 text-slate-300 px-4 py-3 rounded-r my-6"
+        }
+    });
+}
+
+export string layout(string children, string current) {
     return html({
         children: [
+            head({
+                children: [
+                    element("title", {
+                        children: ["May - Documentation"]
+                    }),
+                    element("meta", {
+                        attributes: { charset: "utf-8" }
+                    }),
+                    element("meta", {
+                        attributes: { name: "viewport", content: "width=device-width, initial-scale=1" }
+                    }),
+                    script({
+                        attributes: { src: "https://cdn.tailwindcss.com" }
+                    }),
+                    element("link", {
+                        attributes: {
+                            rel: "preconnect",
+                            href: "https://fonts.googleapis.com"
+                        }
+                    }),
+                    element("link", {
+                        attributes: {
+                            href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+                            rel: "stylesheet"
+                        }
+                    }),
+                    element("style", {
+                        children: ["body{font-family:Inter,system-ui,sans-serif}code,pre{font-family:'JetBrains Mono',monospace}"]
+                    })
+                ]
+            }),
             body({
-                children: [children]
+                children: [
+                    div({
+                        children: [
+                            sidebar(current),
+                            div({
+                                children: [
+                                    topbar(),
+                                    element("main", {
+                                        children: [
+                                            div({
+                                                children: [children],
+                                                attributes: { class: "max-w-3xl mx-auto px-8 py-12" }
+                                            })
+                                        ]
+                                    })
+                                ],
+                                attributes: { class: "flex-1 min-w-0" }
+                            })
+                        ],
+                        attributes: { class: "flex min-h-screen" }
+                    })
+                ],
+                attributes: {
+                    class: "bg-slate-950 text-slate-300 antialiased"
+                }
             })
         ]
     });

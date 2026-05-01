@@ -210,11 +210,8 @@ struct TokenList tokenize(struct Source* filesource) {
 
                 tok.type = STRING;
                 tok.lexeme[0] = '"';
-                for (int j = 0; j < str->as.string.len; j++) {
-                    tok.lexeme[j + 1] = str->as.string.val[j];
-                }
-                tok.lexeme[str->as.string.len + 1] = '"';
-                tok.lexeme[str->as.string.len + 2] = '\0';
+                tok.lexeme[1] = '"';
+                tok.lexeme[2] = '\0';
                 tok.literal = str;
 
                 append_token(&list, tok);
@@ -274,16 +271,44 @@ void free_token_list(struct TokenList* list) {
 void string_val(struct LexerSource* src, struct MayValue* str) {
     src->idx++;
     int start = src->idx;
-    str->as.string.len = 0;
-    while (src->src[src->idx] != '"' && src->src[src->idx] != '\0') {
-        src->idx++;
-        str->as.string.len++;
+
+    int end = start;
+    while (src->src[end] != '"' && src->src[end] != '\0') {
+        if (src->src[end] == '\\' && src->src[end + 1] != '\0') {
+            end += 2;
+        } else {
+            end++;
+        }
     }
 
-    char* val = malloc(str->as.string.len + 1);
-    strncpy(val, src->src + start, str->as.string.len);
-    val[str->as.string.len] = '\0';
+    char* val = malloc(end - start + 1);
+    int out = 0;
+    int i = start;
+    while (i < end) {
+        if (src->src[i] == '\\' && i + 1 < end) {
+            char next = src->src[i + 1];
+            switch (next) {
+                case 'n': val[out++] = '\n'; break;
+                case 't': val[out++] = '\t'; break;
+                case 'r': val[out++] = '\r'; break;
+                case '\\': val[out++] = '\\'; break;
+                case '"': val[out++] = '"'; break;
+                case '0': val[out++] = '\0'; break;
+                default:
+                    val[out++] = '\\';
+                    val[out++] = next;
+                    break;
+            }
+            i += 2;
+        } else {
+            val[out++] = src->src[i];
+            i++;
+        }
+    }
+    val[out] = '\0';
     str->as.string.val = val;
+    str->as.string.len = out;
+    src->idx = end;
 }
 
 void number_val(struct LexerSource* src, struct MayValue* num, struct Token* tok) {

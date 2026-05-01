@@ -20,12 +20,15 @@ enum MayValueType {
 
 struct Param;
 
+struct Env;
+
 struct MayFunc {
     char* name;
     struct StmtList* body;
     int return_type;
     struct Param* params;
     int param_count;
+    struct Env* closure;
 };
 
 struct MayBuiltinFunc {

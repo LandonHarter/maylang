@@ -1,0 +1,58 @@
+export string stdlib_fs() {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Standard Library"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "mb-2" }
+            }),
+            heading("fs"),
+            lead("Read and write files, list directories, and inspect paths on disk."),
+            paragraph("Import:"),
+            code_block("import &quot;fs&quot;;"),
+
+            subheading("Reading"),
+            code_block("string text = read_file(&quot;notes.txt&quot;);\nprint(text);"),
+
+            subheading("Writing"),
+            paragraph("write_file replaces a file; append_file adds to the end."),
+            code_block("write_file(&quot;notes.txt&quot;, &quot;A new note.&quot;);\nappend_file(&quot;log.txt&quot;, &quot;another line\\n&quot;);"),
+
+            subheading("Inspecting"),
+            div({
+                children: [
+                    fs_row("file_exists(path)", "1 if the path exists, 0 otherwise."),
+                    fs_row("file_size(path)", "Size of the file in bytes."),
+                    fs_row("is_dir(path)", "1 if path points to a directory.")
+                ],
+                attributes: { class: "flex flex-col gap-2 my-4" }
+            }),
+
+            subheading("Directories"),
+            code_block("mkdir(&quot;new-folder&quot;);\narray entries = list_dir(&quot;.&quot;);\nentries | length | print;"),
+
+            subheading("Renaming and deleting"),
+            code_block("rename_file(&quot;old.txt&quot;, &quot;new.txt&quot;);\ndelete_file(&quot;new.txt&quot;);")
+        ]
+    });
+}
+
+string fs_row(string name, string desc) {
+    return div({
+        children: [
+            span({
+                children: [name],
+                attributes: { class: "font-mono text-emerald-300 text-sm w-44 shrink-0" }
+            }),
+            span({
+                children: [desc],
+                attributes: { class: "text-sm text-slate-400" }
+            })
+        ],
+        attributes: { class: "flex items-baseline gap-3" }
+    });
+}

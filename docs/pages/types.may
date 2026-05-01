@@ -1,0 +1,64 @@
+export string types() {
+    return div({
+        children: [
+            heading("Types"),
+            lead("May is dynamically typed: type keywords are part of variable declarations, but values carry their own type at runtime."),
+
+            subheading("Primitive types"),
+            div({
+                children: [
+                    type_row("int", "Whole numbers like 0, 42, -7."),
+                    type_row("float", "Decimal numbers like 3.14, 0.5."),
+                    type_row("string", "Text in double quotes."),
+                    type_row("array", "Ordered list, written with [ ]."),
+                    type_row("object", "Key-value collection, written with { }."),
+                    type_row("var", "An untyped slot that holds anything.")
+                ],
+                attributes: { class: "flex flex-col gap-3 my-6" }
+            }),
+
+            subheading("Type conversion"),
+            paragraph("Use toString() to render a number as text. May does not implicitly convert numbers to strings during concatenation."),
+            code_block("int n = 42;\nstring msg = &quot;n is &quot; + toString(n);\nprint(msg);"),
+
+            subheading("Truthiness"),
+            paragraph("Conditional checks treat 0 as false and any other number as true. Strings are usually checked with explicit comparisons."),
+            code_block("if (count) {\n    print(&quot;non-zero&quot;);\n}\n\nif (name == &quot;May&quot;) {\n    print(&quot;match&quot;);\n}"),
+
+            subheading("Strings"),
+            paragraph("Strings concatenate with +. Useful builtins: upper, lower, length, char, substring, replace, capitalize."),
+            code_block("import &quot;string&quot;;\n\n&quot;hello&quot; | upper | print;\n&quot;hello&quot; | length | print;"),
+
+            subheading("Arrays"),
+            paragraph("Arrays hold any mix of values. Index from zero, and use length() to count elements."),
+            code_block("array items = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;];\nitems[1] | print;\nitems | length | print;"),
+
+            subheading("Objects"),
+            paragraph("Objects pair string keys with values. Reach into them with the arrow operator -&gt;. Object literals are how you pass options to many builtins, especially in the html module."),
+            code_block("object person = { name: &quot;Ada&quot;, age: 30 };\nperson-&gt;name | print;\n\n// Used as builtin options\nh1({\n    children: [&quot;Hello&quot;],\n    attributes: { class: &quot;text-2xl&quot; }\n});")
+        ]
+    });
+}
+
+string type_row(string name, string desc) {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: [name],
+                        attributes: { class: "font-mono text-emerald-300 text-sm" }
+                    })
+                ],
+                attributes: { class: "w-24 shrink-0" }
+            }),
+            p({
+                children: [desc],
+                attributes: { class: "text-slate-300 text-sm" }
+            })
+        ],
+        attributes: {
+            class: "flex items-start gap-4 border-l-2 border-slate-800 pl-4 py-1"
+        }
+    });
+}

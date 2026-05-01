@@ -1,0 +1,62 @@
+export string syntax() {
+    return div({
+        children: [
+            heading("Syntax"),
+            lead("A tour of every piece of the May language: literals, control flow, functions, and the pipe operator."),
+
+            subheading("Comments"),
+            paragraph("There are no special comment delimiters. Use whitespace and naming to keep code clear."),
+
+            subheading("Literals"),
+            code_block("42         // int\n3.14       // float\n&quot;hello&quot;    // string\n[1, 2, 3]  // array\n{ k: 1 }   // object"),
+
+            subheading("Variables"),
+            paragraph("Declare a variable with a type keyword followed by a name and an initializer:"),
+            code_block("int score = 100;\nstring name = &quot;May&quot;;\nfloat ratio = 0.5;\narray nums = [1, 2, 3];\nobject user = { name: &quot;Ada&quot;, age: 30 };\nvar anything = 42;"),
+            paragraph("Use var when you do not want to commit to a type. The other keywords double as documentation for what the variable holds."),
+
+            subheading("Operators"),
+            minor_heading("Arithmetic"),
+            code_block("a + b   // add (also concatenates strings)\na - b   // subtract\na * b   // multiply\na / b   // divide\na++     // increment in place"),
+            minor_heading("Comparison"),
+            code_block("a == b\na != b\na &lt; b\na &gt; b\na &lt;= b\na &gt;= b"),
+
+            subheading("The pipe operator"),
+            paragraph("The pipe ( | ) feeds the value on its left into the function on its right. It chains transformations without nesting."),
+            code_block("&quot;hello world&quot; | upper | print;\n// is equivalent to\nprint(upper(&quot;hello world&quot;));"),
+            paragraph("Pipes work with any single-argument function, including ones you write."),
+
+            subheading("Control flow"),
+            minor_heading("If / else"),
+            code_block("if (score &gt;= 90) {\n    print(&quot;A&quot;);\n} else {\n    print(&quot;Not yet&quot;);\n}"),
+            minor_heading("While"),
+            code_block("int i = 0;\nwhile (i &lt; 5) {\n    print(toString(i));\n    i++;\n}"),
+            paragraph("Use break to exit a loop and continue to skip to the next iteration."),
+
+            subheading("Functions"),
+            paragraph("Functions begin with a return type, a name, parameters with their types, and a body. Use return to send a value back."),
+            code_block("int add(int a, int b) {\n    return a + b;\n}\n\nadd(3, 4) | print;"),
+            paragraph("Functions that do not need to return a value can return void:"),
+            code_block("string greet(string name) {\n    return &quot;Hello, &quot; + name;\n}"),
+
+            subheading("Objects and field access"),
+            paragraph("Objects are key-value collections written with curly braces. Access fields with the arrow operator -&gt;:"),
+            code_block("object user = { name: &quot;Ada&quot;, age: 30 };\nuser-&gt;name | print;\nuser-&gt;age | print;"),
+            paragraph("Field access is also how you reach into the request object returned by read_request:"),
+            code_block("object req = read_request(client);\nprint(req-&gt;method + &quot; &quot; + req-&gt;path);"),
+
+            subheading("Arrays"),
+            paragraph("Arrays use square brackets. Use length() to get the size and index with brackets:"),
+            code_block("array nums = [10, 20, 30];\nnums[0] | print;\nnums | length | print;"),
+
+            subheading("Imports and exports"),
+            paragraph("Pull in standard library modules by name:"),
+            code_block("import &quot;io&quot;;\nimport &quot;http&quot;;\nimport &quot;html&quot;;"),
+            paragraph("Pull in your own files by relative path. Mark anything you want to expose with the export keyword:"),
+            code_block("// utils.may\nexport string greet(string name) {\n    return &quot;Hello, &quot; + name;\n}\n\n// main.may\nimport &quot;utils.may&quot;;\ngreet(&quot;world&quot;) | print;"),
+
+            subheading("That is the whole language"),
+            callout("If you have written C, JavaScript, or Python before, you already know May. The unique parts are the pipe operator and the HTML builder, both of which you pick up the first time you see them.")
+        ]
+    });
+}

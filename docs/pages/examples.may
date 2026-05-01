@@ -1,0 +1,34 @@
+export string examples() {
+    return div({
+        children: [
+            heading("Examples"),
+            lead("Real programs that show off what May can do. Each one is a complete, runnable script."),
+
+            subheading("Hello world"),
+            paragraph("The smallest possible May program."),
+            code_block("import &quot;io&quot;;\n\nprint(&quot;Hello world!&quot;);\ncolprint(&quot;Hello world in red!&quot;, &quot;red&quot;);"),
+
+            subheading("Pipe everything"),
+            paragraph("The pipe operator turns nested calls into a left-to-right pipeline."),
+            code_block("import &quot;io&quot;;\nimport &quot;string&quot;;\n\n&quot;hello world&quot; | upper | print;"),
+
+            subheading("Find a substring"),
+            paragraph("A naive substring search written by hand."),
+            code_block("import &quot;io&quot;;\nimport &quot;string&quot;;\n\nint find(string str, string pattern) {\n    int count = 0;\n    int limit = (str | length) - (pattern | length);\n    int plen = pattern | length;\n    while (count &lt;= limit) {\n        int subcount = 0;\n        int isfound = 1;\n        while (subcount &lt; plen) {\n            if (char(str, count + subcount) != char(pattern, subcount)) {\n                isfound = 0;\n            }\n            subcount++;\n        }\n        if (isfound) { return count; }\n        count++;\n    }\n    return -1;\n}\n\nstring message = &quot;Dusty May is the greatest basketball coach of all time.&quot;;\nfind(message, &quot;coach&quot;) | print;"),
+
+            subheading("Calling a public API"),
+            paragraph("Ask the user a question, then call an HTTP endpoint and print the result."),
+            code_block("import &quot;io&quot;;\nimport &quot;api&quot;;\nimport &quot;string&quot;;\n\nstring confirm = input(&quot;Want a fact about dogs? [y/n] &quot;);\nif ((confirm | upper) == &quot;Y&quot;) {\n    object res = curl(&quot;https://dogapi.dog/api/v2/facts?limit=1&quot;, {});\n    res-&gt;data[0]-&gt;attributes-&gt;body | print;\n} else {\n    print(&quot;Maybe next time!&quot;);\n}"),
+
+            subheading("HTMX counter"),
+            paragraph("Server-rendered, no JavaScript framework, just a button that pings an endpoint and swaps in new HTML."),
+            code_block("import &quot;http&quot;;\nimport &quot;io&quot;;\nimport &quot;html&quot;;\n\nint count = 0;\n\nstring counter() {\n    return div({\n        children: [\n            h1({ children: [toString(count)],\n                 attributes: { class: &quot;text-4xl&quot; } }),\n            button({\n                children: [&quot;Increment&quot;],\n                attributes: {\n                    &quot;hx-post&quot;: &quot;/increment&quot;,\n                    &quot;hx-target&quot;: &quot;#counter&quot;,\n                    class: &quot;bg-blue-500 text-white px-4 py-2 rounded&quot;\n                }\n            })\n        ],\n        attributes: { id: &quot;counter&quot; }\n    });\n}\n\nstring home() {\n    return html({\n        children: [\n            head({ children: [\n                script({ attributes: { src: &quot;https://cdn.tailwindcss.com&quot; } }),\n                script({ attributes: { src: &quot;https://unpkg.com/htmx.org@2.0.4&quot; } })\n            ] }),\n            body({ children: [counter()] })\n        ]\n    });\n}\n\nint server = create_server(8080);\nwhile (1) {\n    int client = accept_client(server);\n    object req = read_request(client);\n    if (req-&gt;path == &quot;/increment&quot;) {\n        count = count + 1;\n        send_html(client, counter());\n    } else {\n        send_html(client, router(req, { &quot;/&quot;: home() }));\n    }\n}"),
+
+            subheading("AI chat"),
+            paragraph("Ask a question, hand it to an OpenAI-compatible model, print the answer."),
+            code_block("import &quot;io&quot;;\nimport &quot;api&quot;;\nimport &quot;dotenv&quot;;\n\nstring prompt = input(&quot;What would you like to ask AI: &quot;);\n\ncurl(envvar(&quot;AI_URL&quot;), {\n    method: &quot;POST&quot;,\n    headers: { Authorization: &quot;Bearer &quot; + envvar(&quot;AI_API_KEY&quot;) },\n    body: {\n        model: envvar(&quot;AI_MODEL&quot;),\n        messages: [\n            { role: &quot;system&quot;, content: &quot;You are a super friendly AI.&quot; },\n            { role: &quot;user&quot;, content: prompt }\n        ]\n    }\n}) | print;"),
+
+            callout("All of these examples live in the examples/ directory of the repository. Clone, edit, and run them to start playing.")
+        ]
+    });
+}

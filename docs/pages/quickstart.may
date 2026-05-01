@@ -1,0 +1,35 @@
+export string quickstart() {
+    return div({
+        children: [
+            heading("Quick Start"),
+            lead("Write your first May program in under a minute. By the end of this page you will have run a script, used the pipe operator, and served a web page."),
+
+            subheading("Hello world"),
+            paragraph("Create a file called hello.may:"),
+            code_block("import &quot;io&quot;;\n\nprint(&quot;Hello world!&quot;);\ncolprint(&quot;Hello world in red!&quot;, &quot;red&quot;);"),
+            paragraph("Run it:"),
+            code_block("may hello.may"),
+
+            subheading("Variables and types"),
+            paragraph("May has a small set of types you declare with keywords:"),
+            code_block("int count = 0;\nstring name = &quot;May&quot;;\nfloat pi = 3.14;\nobject user = { name: &quot;Ada&quot;, age: 30 };\narray scores = [88, 92, 75];\nvar anything = 42;"),
+
+            subheading("The pipe operator"),
+            paragraph("May has a Unix-style pipe operator that feeds the value on the left into the function on the right. It makes data transformations read top-to-bottom, left-to-right."),
+            code_block("import &quot;io&quot;;\nimport &quot;string&quot;;\n\n&quot;hello world&quot; | upper | print;"),
+            paragraph("Equivalent to print(upper(&quot;hello world&quot;)) but easier to extend."),
+
+            subheading("Functions"),
+            paragraph("Declare functions by writing a return type, a name, parameters, and a body:"),
+            code_block("int square(int n) {\n    return n * n;\n}\n\nsquare(5) | print;"),
+
+            subheading("Your first server"),
+            paragraph("May has an HTTP server and an HTML builder built in. Here is a complete web app:"),
+            code_block("import &quot;io&quot;;\nimport &quot;http&quot;;\nimport &quot;html&quot;;\n\nstring home() {\n    return html({\n        children: [\n            body({\n                children: [\n                    h1({ children: [&quot;Welcome to May&quot;] }),\n                    p({ children: [&quot;This page was rendered by a 20 line script.&quot;] })\n                ]\n            })\n        ]\n    });\n}\n\nint server = create_server(8080);\nprint(&quot;Listening on http://localhost:8080&quot;);\n\nwhile (1) {\n    int client = accept_client(server);\n    object req = read_request(client);\n    send_html(client, router(req, { &quot;/&quot;: home() }));\n}"),
+            paragraph("Run it with may server.may and open http://localhost:8080."),
+
+            subheading("Where next?"),
+            paragraph("Read the Syntax page for a full tour of the language, or browse the Standard Library to see every builtin available.")
+        ]
+    });
+}

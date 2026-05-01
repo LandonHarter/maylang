@@ -1,3 +1,116 @@
 export string introduction() {
-    return "try some changes";
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Welcome"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    }),
+                    h1({
+                        children: ["May"],
+                        attributes: { class: "text-6xl font-bold text-white mt-3 mb-4 tracking-tight" }
+                    }),
+                    p({
+                        children: [
+                            "The best programming language ever created (not an opinion)"
+                        ],
+                        attributes: { class: "text-xl text-slate-400 leading-relaxed max-w-2xl" }
+                    })
+                ],
+                attributes: { class: "mb-12" }
+            }),
+            div({
+                children: [
+                    a({
+                        children: ["Get Started"],
+                        attributes: {
+                            href: "/install",
+                            class: "inline-block bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-medium px-5 py-2.5 rounded-md transition-colors"
+                        }
+                    }),
+                    a({
+                        children: ["Browse Examples"],
+                        attributes: {
+                            href: "/examples",
+                            class: "inline-block border border-slate-700 hover:border-slate-500 text-slate-200 font-medium px-5 py-2.5 rounded-md transition-colors ml-3"
+                        }
+                    })
+                ],
+                attributes: { class: "mb-16" }
+            }),
+            subheading("What is May?"),
+            paragraph("May is a simple interpreted language written in C as a learning project. However, it does have practical application, as this entire documentation site was written using May, containerized using Docker, and hosted through Github Pages."),
+            callout("May is named after the greatest basketball coach to ever live, Dusty May."),
+            subheading("A taste of May"),
+            paragraph("Here is a complete HTTP server that renders a styled page using the built-in HTML library:"),
+            code_block("import &quot;io&quot;;\nimport &quot;http&quot;;\nimport &quot;html&quot;;\n\nstring home() {\n    return html({\n        children: [\n            body({\n                children: [\n                    h1({ children: [&quot;Hello from May!&quot;] })\n                ]\n            })\n        ]\n    });\n}\n\nint server = create_server(8080);\nprint(&quot;Server running on port 8080&quot;);\n\nwhile (1) {\n    int client = accept_client(server);\n    object req = read_request(client);\n    send_html(client, router(req, { &quot;/&quot;: home() }));\n}"),
+            subheading("Why May?"),
+            div({
+                children: [
+                    feature_card("Pipe operator", "Chain transformations the way Unix taught you. &quot;hello&quot; | upper | print is a complete program."),
+                    feature_card("Batteries included", "An HTTP server, HTML builder, HTTP client, environment loader, and file system live inside the interpreter."),
+                    feature_card("HTML as data", "Build pages from nested function calls. No templating language to learn — just the language you are already writing."),
+                    feature_card("One binary", "May is a single C executable with no runtime dependencies. Drop it anywhere and run.")
+                ],
+                attributes: { class: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4" }
+            }),
+            subheading("Where to next?"),
+            div({
+                children: [
+                    next_card("/install", "Installation", "Build May from source or pull the Docker image."),
+                    next_card("/syntax", "Syntax", "Variables, control flow, functions, and the pipe operator."),
+                    next_card("/stdlib/html", "Standard Library", "Browse every builtin available out of the box."),
+                    next_card("/examples", "Examples", "See real programs from a counter app to AI calls.")
+                ],
+                attributes: { class: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4" }
+            })
+        ]
+    });
+}
+
+string feature_card(string title, string desc) {
+    return div({
+        children: [
+            h3({
+                children: [title],
+                attributes: { class: "text-base font-semibold text-white mb-2" }
+            }),
+            p({
+                children: [desc],
+                attributes: { class: "text-sm text-slate-400 leading-relaxed" }
+            })
+        ],
+        attributes: {
+            class: "border border-slate-800 bg-slate-900/40 rounded-lg p-5"
+        }
+    });
+}
+
+string next_card(string href, string title, string desc) {
+    return a({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: [title],
+                        attributes: { class: "text-base font-semibold text-white" }
+                    }),
+                    span({
+                        children: ["&rarr;"],
+                        attributes: { class: "text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "flex items-center justify-between mb-2" }
+            }),
+            p({
+                children: [desc],
+                attributes: { class: "text-sm text-slate-400 leading-relaxed" }
+            })
+        ],
+        attributes: {
+            href: href,
+            class: "block border border-slate-800 hover:border-emerald-500/50 bg-slate-900/40 hover:bg-slate-900 rounded-lg p-5 transition-colors"
+        }
+    });
 }

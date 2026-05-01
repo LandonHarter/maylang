@@ -1,0 +1,27 @@
+export string stdlib_dotenv() {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Standard Library"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "mb-2" }
+            }),
+            heading("dotenv"),
+            lead("Read configuration values from a .env file or the surrounding process environment."),
+            paragraph("Import:"),
+            code_block("import &quot;dotenv&quot;;"),
+
+            subheading("envvar"),
+            paragraph("Look up a value by name. If a .env file is present in the working directory, its keys are loaded automatically."),
+            code_block("string key = envvar(&quot;AI_API_KEY&quot;);\nstring url = envvar(&quot;AI_URL&quot;);"),
+
+            subheading("Example .env"),
+            code_block("AI_URL=https://api.openai.com/v1/chat/completions\nAI_MODEL=gpt-4\nAI_API_KEY=sk-..."),
+            callout("Never commit your .env file. Add it to .gitignore so secrets stay on the machines that need them.")
+        ]
+    });
+}

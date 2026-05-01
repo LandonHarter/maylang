@@ -1,0 +1,56 @@
+export string install() {
+    return div({
+        children: [
+            heading("Installation"),
+            lead("May is distributed as source you can build with a C compiler, or as a Docker image you can run anywhere."),
+
+            subheading("Build from source"),
+            paragraph("Clone the repository and compile with gcc. May depends on libcurl for the HTTP client and pthread for concurrent connections."),
+            minor_heading("Linux / macOS"),
+            code_block("git clone https://github.com/LandonHarter/maylang.git\ncd maylang\nmkdir -p bin\ngcc -I ./include src/*.c src/lib/*.c main.c -o bin/may -lm -lcurl -lpthread"),
+            paragraph("Move the binary somewhere on your PATH:"),
+            code_block("sudo mv bin/may /usr/local/bin/may"),
+
+            subheading("Dependencies"),
+            div({
+                children: [
+                    dep_item("libcurl", "HTTP client used by the api module."),
+                    dep_item("libc6", "Standard C library."),
+                    dep_item("libm", "Math functions used by the math module."),
+                    dep_item("libpthread", "Threading for concurrent client handling.")
+                ],
+                attributes: { class: "flex flex-col gap-2 my-4" }
+            }),
+            paragraph("On Debian/Ubuntu:"),
+            code_block("apt update &amp;&amp; apt install -y build-essential libcurl4-openssl-dev"),
+
+            subheading("Run a script"),
+            paragraph("Once installed, point may at any .may file:"),
+            code_block("may hello.may"),
+            paragraph("Where hello.may could be:"),
+            code_block("import &quot;io&quot;;\nprint(&quot;Hello world!&quot;);"),
+
+            subheading("Docker"),
+            paragraph("A Dockerfile ships with the repository and is set up to run the documentation server. You can adapt it for your own apps:"),
+            code_block("FROM ubuntu:26.04 AS builder\nRUN apt update &amp;&amp; apt install -y curl git build-essential \\\n    libcurl4-openssl-dev libc6\nRUN git clone https://github.com/LandonHarter/maylang.git /app\nWORKDIR /app\nRUN mkdir -p bin &amp;&amp; gcc -I ./include src/*.c src/lib/*.c main.c \\\n    -o bin/may -lm -lcurl -lpthread\n\nFROM ubuntu:26.04\nRUN apt update &amp;&amp; apt install -y libcurl4 libc6\nCOPY --from=builder /app/bin/may /usr/local/bin/may\nCOPY ./app /app\nWORKDIR /app\nCMD [&quot;may&quot;, &quot;server.may&quot;]"),
+
+            callout("That is everything. There is no package manager, no virtualenv, and no build script. One binary, one file to run."),
+
+            subheading("Next"),
+            paragraph("Head to the Quick Start to write your first program, or jump into the Syntax reference.")
+        ]
+    });
+}
+
+string dep_item(string name, string desc) {
+    return div({
+        children: [
+            inline_code(name),
+            span({
+                children: [desc],
+                attributes: { class: "text-sm text-slate-400" }
+            })
+        ],
+        attributes: { class: "flex items-center gap-3" }
+    });
+}

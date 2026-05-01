@@ -1,0 +1,40 @@
+export string stdlib_math() {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Standard Library"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "mb-2" }
+            }),
+            heading("math"),
+            lead("Numeric helpers, trig functions, and a random number generator."),
+            paragraph("Import:"),
+            code_block("import &quot;math&quot;;"),
+
+            subheading("Rounding"),
+            code_block("ceil(3.2)  | print; // 4\nfloor(3.8) | print; // 3\nround(3.5) | print; // 4\nabs(-7)    | print; // 7"),
+
+            subheading("Powers and roots"),
+            code_block("pow(2, 10) | print; // 1024\nsqrt(81)   | print; // 9"),
+
+            subheading("Min / max"),
+            code_block("min(3, 7)  | print; // 3\nmax(3, 7)  | print; // 7"),
+
+            subheading("Logarithms"),
+            paragraph("log is natural log; log2n is base-2; nlog is base-n."),
+            code_block("log(2.71828) | print;\nlog2n(8)     | print;\nnlog(100, 10) | print;"),
+
+            subheading("Trigonometry"),
+            paragraph("Standard trig and hyperbolic functions are all available:"),
+            code_block("sin(x)   cos(x)   tan(x)\nasin(x)  acos(x)  atan(x)\nsinh(x)  cosh(x)  tanh(x)\nasinh(x) acosh(x) atanh(x)"),
+
+            subheading("random"),
+            paragraph("Return a random number."),
+            code_block("random() | print;")
+        ]
+    });
+}

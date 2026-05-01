@@ -5,6 +5,21 @@ import "html";
 import "layout.may";
 
 import "pages/introduction.may";
+import "pages/install.may";
+import "pages/quickstart.may";
+import "pages/syntax.may";
+import "pages/types.may";
+import "pages/modules.may";
+import "pages/examples.may";
+
+import "pages/stdlib/io.may";
+import "pages/stdlib/string.may";
+import "pages/stdlib/math.may";
+import "pages/stdlib/http.may";
+import "pages/stdlib/html.may";
+import "pages/stdlib/api.may";
+import "pages/stdlib/fs.may";
+import "pages/stdlib/dotenv.may";
 
 int server = create_server(3000);
 print("Server running on port 3000");
@@ -12,8 +27,22 @@ print("Server running on port 3000");
 while (1) {
     int client = accept_client(server);
     object req = read_request(client);
+    print(req->method + " " + req->path);
     send_html(client, layout(router(req, {
-        "/": introduction()
-    })));
+        "/": introduction(),
+        "/install": install(),
+        "/quickstart": quickstart(),
+        "/syntax": syntax(),
+        "/types": types(),
+        "/modules": modules(),
+        "/examples": examples(),
+        "/stdlib/io": stdlib_io(),
+        "/stdlib/string": stdlib_string(),
+        "/stdlib/math": stdlib_math(),
+        "/stdlib/http": stdlib_http(),
+        "/stdlib/html": stdlib_html(),
+        "/stdlib/api": stdlib_api(),
+        "/stdlib/fs": stdlib_fs(),
+        "/stdlib/dotenv": stdlib_dotenv()
+    }), req->path));
 }
-

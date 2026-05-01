@@ -1,0 +1,54 @@
+export string stdlib_api() {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Standard Library"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "mb-2" }
+            }),
+            heading("api"),
+            lead("Make outbound HTTP requests. Backed by libcurl, with JSON parsed into native objects."),
+            paragraph("Import:"),
+            code_block("import &quot;api&quot;;"),
+
+            subheading("curl"),
+            paragraph("Send a request and get the parsed response. The first argument is a URL; the second is an options object."),
+            code_block("object res = curl(&quot;https://dogapi.dog/api/v2/facts?limit=1&quot;, {});\nres-&gt;data[0]-&gt;attributes-&gt;body | print;"),
+
+            subheading("Options"),
+            paragraph("All options are optional:"),
+            div({
+                children: [
+                    opt_row("method", "GET, POST, PUT, DELETE, etc. Default GET."),
+                    opt_row("headers", "An object of header name to value."),
+                    opt_row("body", "An object that will be sent as JSON.")
+                ],
+                attributes: { class: "flex flex-col gap-3 my-4" }
+            }),
+
+            subheading("POST with a JSON body"),
+            code_block("curl(&quot;https://api.example.com/items&quot;, {\n    method: &quot;POST&quot;,\n    headers: {\n        Authorization: &quot;Bearer &quot; + token\n    },\n    body: {\n        name: &quot;widget&quot;,\n        price: 9.99\n    }\n}) | print;"),
+
+            subheading("Calling an LLM"),
+            paragraph("Most chat APIs follow the OpenAI shape, so a single curl call works against many providers:"),
+            code_block("import &quot;dotenv&quot;;\n\nstring url = envvar(&quot;AI_URL&quot;);\nstring model = envvar(&quot;AI_MODEL&quot;);\nstring key = envvar(&quot;AI_API_KEY&quot;);\n\ncurl(url, {\n    method: &quot;POST&quot;,\n    headers: { Authorization: &quot;Bearer &quot; + key },\n    body: {\n        model: model,\n        messages: [\n            { role: &quot;system&quot;, content: &quot;You are friendly.&quot; },\n            { role: &quot;user&quot;, content: &quot;Hi!&quot; }\n        ]\n    }\n}) | print;")
+        ]
+    });
+}
+
+string opt_row(string name, string desc) {
+    return div({
+        children: [
+            inline_code(name),
+            span({
+                children: [desc],
+                attributes: { class: "text-sm text-slate-400" }
+            })
+        ],
+        attributes: { class: "flex items-center gap-3" }
+    });
+}

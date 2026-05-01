@@ -1,0 +1,47 @@
+export string stdlib_string() {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Standard Library"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "mb-2" }
+            }),
+            heading("string"),
+            lead("Inspect, transform, and reshape text."),
+            paragraph("Import:"),
+            code_block("import &quot;string&quot;;"),
+
+            subheading("upper / lower / capitalize"),
+            paragraph("Change case."),
+            code_block("&quot;hello&quot; | upper | print;       // HELLO\n&quot;HELLO&quot; | lower | print;       // hello\n&quot;hello&quot; | capitalize | print;  // Hello"),
+
+            subheading("length"),
+            paragraph("Number of characters in a string."),
+            code_block("&quot;may&quot; | length | print; // 3"),
+
+            subheading("char"),
+            paragraph("Return the character at an index. Indexing starts at zero."),
+            code_block("char(&quot;hello&quot;, 1) | print; // e"),
+
+            subheading("substring"),
+            paragraph("Slice out a portion of a string."),
+            code_block("substring(&quot;hello world&quot;, 6, 11) | print; // world"),
+
+            subheading("replace"),
+            paragraph("Swap every occurrence of a pattern."),
+            code_block("replace(&quot;hello world&quot;, &quot;world&quot;, &quot;may&quot;) | print;"),
+
+            subheading("alpha / numeric / alphanumeric"),
+            paragraph("Predicates that report whether a string contains only the given character class."),
+            code_block("alpha(&quot;hello&quot;)         | print; // 1\nnumeric(&quot;hello123&quot;)    | print; // 0\nalphanumeric(&quot;abc12&quot;)  | print; // 1"),
+
+            subheading("toString"),
+            paragraph("Render a number as a string. Useful when concatenating with text."),
+            code_block("int n = 42;\nprint(&quot;n is &quot; + toString(n));")
+        ]
+    });
+}

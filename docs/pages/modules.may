@@ -1,0 +1,28 @@
+export string modules() {
+    return div({
+        children: [
+            heading("Modules"),
+            lead("May programs are organized into files. Pull in standard modules by name and your own files by path."),
+
+            subheading("Standard modules"),
+            paragraph("These ship with the interpreter and are imported by name without an extension:"),
+            code_block("import &quot;io&quot;;\nimport &quot;http&quot;;\nimport &quot;html&quot;;\nimport &quot;string&quot;;\nimport &quot;math&quot;;\nimport &quot;api&quot;;\nimport &quot;fs&quot;;\nimport &quot;dotenv&quot;;"),
+            paragraph("After importing, every builtin in the module becomes available in your script."),
+
+            subheading("Your own files"),
+            paragraph("Local imports use a relative path ending in .may. Mark anything you want callers to see with export."),
+            code_block("// math_utils.may\nexport int square(int n) {\n    return n * n;\n}\n\nexport int cube(int n) {\n    return n * n * n;\n}"),
+            code_block("// main.may\nimport &quot;io&quot;;\nimport &quot;math_utils.may&quot;;\n\nsquare(5) | print;\ncube(3) | print;"),
+
+            subheading("Exporting values"),
+            paragraph("You can export top-level variables in addition to functions:"),
+            code_block("// config.may\nexport string secret = &quot;My secret phrase...&quot;;"),
+            code_block("// main.may\nimport &quot;io&quot;;\nimport &quot;config.may&quot;;\n\nsecret | print;"),
+
+            subheading("Project layout"),
+            paragraph("A typical web app might look like this:"),
+            code_block("my-app/\n  server.may       // entrypoint, imports everything\n  layout.may       // shared HTML wrapper\n  pages/\n    home.may\n    about.may\n  components/\n    nav.may"),
+            callout("There is no central manifest. Imports drive the dependency graph; the file you pass to may is the entrypoint.")
+        ]
+    });
+}

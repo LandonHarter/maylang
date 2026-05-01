@@ -1,0 +1,46 @@
+export string stdlib_http() {
+    return div({
+        children: [
+            div({
+                children: [
+                    span({
+                        children: ["Standard Library"],
+                        attributes: { class: "text-xs font-semibold uppercase tracking-widest text-emerald-400" }
+                    })
+                ],
+                attributes: { class: "mb-2" }
+            }),
+            heading("http"),
+            lead("A minimal HTTP server. Open a port, accept clients, read requests, send responses."),
+            paragraph("Import:"),
+            code_block("import &quot;http&quot;;"),
+
+            subheading("create_server"),
+            paragraph("Open a listening socket on the given port and return a handle."),
+            code_block("int server = create_server(8080);"),
+
+            subheading("accept_client"),
+            paragraph("Block until a client connects, then return a handle for that client."),
+            code_block("int client = accept_client(server);"),
+
+            subheading("read_request"),
+            paragraph("Parse the incoming HTTP request from a client. The result is an object with method, path, headers, and body fields."),
+            code_block("object req = read_request(client);\nprint(req-&gt;method + &quot; &quot; + req-&gt;path);"),
+
+            subheading("send_html"),
+            paragraph("Send an HTML response to the client. The body is written verbatim with a 200 OK and Content-Type: text/html."),
+            code_block("send_html(client, &quot;&lt;h1&gt;Hello&lt;/h1&gt;&quot;);"),
+
+            subheading("send_response"),
+            paragraph("Send a custom response with a status code and body."),
+            code_block("send_response(client, 404, &quot;Not found&quot;);"),
+
+            subheading("close_client"),
+            paragraph("Close a client connection. Most apps will only need this if they manage long-lived connections explicitly."),
+            code_block("close_client(client);"),
+
+            subheading("Putting it together"),
+            code_block("import &quot;io&quot;;\nimport &quot;http&quot;;\nimport &quot;html&quot;;\n\nint server = create_server(8080);\nprint(&quot;Listening on :8080&quot;);\n\nwhile (1) {\n    int client = accept_client(server);\n    object req = read_request(client);\n    send_html(client, router(req, {\n        &quot;/&quot;: h1({ children: [&quot;Hello&quot;] })\n    }));\n}")
+        ]
+    });
+}
