@@ -49,46 +49,46 @@ export string sidebar(string current) {
                             })
                         ],
                         attributes: {
-                            href: "/",
+                            href: "/maylang/",
                             class: "flex items-center gap-3 px-3 py-2 mb-4"
                         }
                     }),
                     nav_heading("Getting Started"),
                     div({
                         children: [
-                            nav_link("/", "Introduction", current),
-                            nav_link("/install", "Installation", current),
-                            nav_link("/quickstart", "Quick Start", current)
+                            nav_link("/maylang/", "Introduction", current),
+                            nav_link("/maylang/install", "Installation", current),
+                            nav_link("/maylang/quickstart", "Quick Start", current)
                         ],
                         attributes: { class: "flex flex-col gap-1" }
                     }),
                     nav_heading("Language"),
                     div({
                         children: [
-                            nav_link("/syntax", "Syntax", current),
-                            nav_link("/types", "Types", current),
-                            nav_link("/modules", "Modules", current)
+                            nav_link("/maylang/syntax", "Syntax", current),
+                            nav_link("/maylang/types", "Types", current),
+                            nav_link("/maylang/modules", "Modules", current)
                         ],
                         attributes: { class: "flex flex-col gap-1" }
                     }),
                     nav_heading("Standard Library"),
                     div({
                         children: [
-                            nav_link("/stdlib/io", "io", current),
-                            nav_link("/stdlib/string", "string", current),
-                            nav_link("/stdlib/math", "math", current),
-                            nav_link("/stdlib/http", "http", current),
-                            nav_link("/stdlib/html", "html", current),
-                            nav_link("/stdlib/api", "api", current),
-                            nav_link("/stdlib/fs", "fs", current),
-                            nav_link("/stdlib/dotenv", "dotenv", current)
+                            nav_link("/maylang/stdlib/io", "io", current),
+                            nav_link("/maylang/stdlib/string", "string", current),
+                            nav_link("/maylang/stdlib/math", "math", current),
+                            nav_link("/maylang/stdlib/http", "http", current),
+                            nav_link("/maylang/stdlib/html", "html", current),
+                            nav_link("/maylang/stdlib/api", "api", current),
+                            nav_link("/maylang/stdlib/fs", "fs", current),
+                            nav_link("/maylang/stdlib/dotenv", "dotenv", current)
                         ],
                         attributes: { class: "flex flex-col gap-1" }
                     }),
                     nav_heading("Examples"),
                     div({
                         children: [
-                            nav_link("/examples", "Showcase", current)
+                            nav_link("/maylang/examples", "Showcase", current)
                         ],
                         attributes: { class: "flex flex-col gap-1" }
                     })
